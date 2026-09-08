@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Linear regression · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+  <style>
+    .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+    .plot img { display: block; width: 100%; height: auto; }
+    .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="active">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <h1>Linear regression</h1>
+    <p class="lead"><span class="tag ml">ML</span> Fit a line to 20 synthetic points</p>
+    <h2>Insight</h2>
+    <div class="insight"><p>Minimize squared vertical distances (residuals). Closed form <code>w = (XᵀX)⁻¹ Xᵀy</code> jumps to the unique minimum of a convex loss bowl.</p></div>
+    <h2>1. Data and fitted line</h2>
+    <p>20 points from <code>y = 2.5x + 3</code> plus noise. Least squares recovers the line in one shot.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/ml/assets/linear_regression_fit.png" alt="Scatter of 20 points with fitted blue line" /></div>
+    <p class="caption">Green = data · blue = fitted line</p>
+    <h2>2. Residuals</h2>
+    <p>Red segments are vertical errors. Squaring them penalizes large misses more.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/ml/assets/linear_regression_residuals.png" alt="Residuals drawn as red vertical lines" /></div>
+    <h2>3. Loss surface</h2>
+    <p>MSE vs slope and intercept — a convex bowl. Green dot is the optimum.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/ml/assets/linear_regression_loss.png" alt="MSE contour surface with optimal point" /></div>
+
+    <p><a href="/leetcode-ml-notes/ml/">← all ML</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>

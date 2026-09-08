@@ -3,8 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Container With Most Water · Ignasi notes</title>
+  <title>11. Container With Most Water · Ignasi notes</title>
   <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+  <style>
+    .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+    .plot img { display: block; width: 100%; height: auto; }
+    .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  </style>
 </head>
 <body>
   <header class="top">
@@ -20,9 +25,16 @@
     <h1>11. Container With Most Water</h1>
     <p class="lead"><span class="tag">Two pointers from both ends</span></p>
     <h2>Insight</h2>
-    <div class="insight"><p>Start wide. Area=(j-i)*min(h[i],h[j]). Always advance the shorter end — every remaining pair using it is worse.</p></div>
-    <h2>Pattern</h2>
-    <div class="pattern"><p>Two pointers from both ends</p></div>
+    <div class="insight"><p>Start wide. Area = (j−i)×min(h[i],h[j]). Always advance the shorter end — every remaining pair using it is worse.</p></div>
+    <h2>1. Optimal container</h2>
+    <p>For <code>[1,8,6,2,5,4,8,3,7]</code> the best is indices 1 and 8 → area <strong>49</strong>.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/container_optimal.png" alt="Optimal water container between indices 1 and 8" /></div>
+    <h2>2. Algorithm steps</h2>
+    <p>First four pointer moves. Always kill the shorter side.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/container_steps.png" alt="Four steps of two-pointer sweep" /></div>
+    <h2>3. Area progression</h2>
+    <p>Area is not monotonic — track a running best. Only O(n) pairs checked.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/container_progression.png" alt="Area over algorithm steps" /></div>
     <h2>Code</h2>
     <pre><code>class Solution:
     def maxArea(self, height):
@@ -33,8 +45,8 @@
             if hi &lt;= hj: i += 1
             else: j -= 1
         return best</code></pre>
-    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
 
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
   </main>
   <footer>
     <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
