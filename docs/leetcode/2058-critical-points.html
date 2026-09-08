@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Find the Minimum and Maximum Number of Nodes Between Critical Points · Ignasi notes</title>
   <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
 </head>
 <body>
   <header class="top">
@@ -21,6 +30,8 @@
     <p class="lead"><span class="tag">Extrema along a line</span></p>
     <h2>Insight</h2>
     <div class="insight"><p>Critical = strict local min/max (ends never). Min distance = closest consecutive criticals; max = first vs last. Stream first/prev/min_gap for O(1) extra space.</p></div>
+    <h2>Visual</h2>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/2058_critical.png" alt="Critical points along the list" /></div>
     <h2>Pattern</h2>
     <div class="pattern"><p>Extrema along a line</p></div>
     <h2>Code</h2>

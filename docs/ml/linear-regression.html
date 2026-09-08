@@ -10,6 +10,15 @@
     .plot img { display: block; width: 100%; height: auto; }
     .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
   </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
 </head>
 <body>
   <header class="top">
@@ -24,7 +33,7 @@
     <h1>Linear regression</h1>
     <p class="lead"><span class="tag ml">ML</span> Fit a line to 20 synthetic points</p>
     <h2>Insight</h2>
-    <div class="insight"><p>Minimize squared vertical distances (residuals). Closed form <code>w = (XᵀX)⁻¹ Xᵀy</code> jumps to the unique minimum of a convex loss bowl.</p></div>
+    <div class="insight"><p>Minimize squared vertical distances (residuals). Closed form \( w=(X^\top X)^{-1}X^\top y \) jumps to the unique minimum of a convex loss bowl.</p></div>
     <h2>1. Data and fitted line</h2>
     <p>20 points from <code>y = 2.5x + 3</code> plus noise. Least squares recovers the line in one shot.</p>
     <div class="plot"><img src="/leetcode-ml-notes/ml/assets/linear_regression_fit.png" alt="Scatter of 20 points with fitted blue line" /></div>

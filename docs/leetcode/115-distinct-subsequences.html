@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Distinct Subsequences · Ignasi notes</title>
   <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
 </head>
 <body>
   <header class="top">
@@ -21,6 +30,9 @@
     <p class="lead"><span class="tag">Count ways along two sequences</span></p>
     <h2>Insight</h2>
     <div class="insight"><p>State (i in s, j in t). Skip always; take on match. Put a pointer in the *target* on day one — generating all subsequences of s then filtering explodes.</p></div>
+    <h2>Visual</h2>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/115_dp_heatmap.png" alt="DP heatmap for distinct subsequences" /></div>
+    <p>$$dp[i][j]=dp[i-1][j]+[s_{i-1}=t_{j-1}] dp[i-1][j-1]$$</p>
     <h2>Pattern</h2>
     <div class="pattern"><p>Count ways along two sequences</p></div>
     <h2>Code</h2>

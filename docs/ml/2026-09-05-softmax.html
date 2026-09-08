@@ -10,6 +10,15 @@
     .plot img { display: block; width: 100%; height: auto; }
     .formula { overflow-x: auto; }
   </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
 </head>
 <body>
   <header class="top">
@@ -25,7 +34,7 @@
     <p class="lead"><span class="tag ml">ML</span> Shift by max before exp</p>
     <h2>Insight</h2>
     <div class="insight"><p>Softmax is invariant to shifting all logits. Subtract <code>max(z)</code> before <code>exp</code> so large values do not overflow.</p></div>
-    <div class="formula"><pre><code>softmax(z)_i = exp(z_i - max z) / sum_j exp(z_j - max z)</code></pre></div>
+    <p>$$\mathrm{softmax}(z)_i=\frac{e^{z_i-\max z}}{\sum_j e^{z_j-\max z}}$$</p>
     <h2>Small logits — both fine</h2>
     <div class="plot"><img src="/leetcode-ml-notes/ml/assets/softmax-small.png" alt="Bar chart of softmax([1, 2, 3, 0.5])" /></div>
     <h2>Large logits — naive overflows, stable does not</h2>

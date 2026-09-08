@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Smallest Stable Index II · Ignasi notes</title>
   <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
 </head>
 <body>
   <header class="top">
@@ -21,6 +30,9 @@
     <p class="lead"><span class="tag">Prefix max + suffix min</span></p>
     <h2>Insight</h2>
     <div class="insight"><p>Score at i is max(prefix≤i)−min(suffix≥i). Build pref L→R and suf R→L, then first i with pref[i]-suf[i]≤k.</p></div>
+    <h2>Visual</h2>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/3904_prefsuf.png" alt="Prefix max and suffix min" /></div>
+    <p>$$\mathrm{score}(i)=\max(nums[0..i])-\min(nums[i..n-1])$$</p>
     <h2>Pattern</h2>
     <div class="pattern"><p>Prefix max + suffix min</p></div>
     <h2>Code</h2>
