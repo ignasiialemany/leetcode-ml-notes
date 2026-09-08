@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ML · Ignasi notes</title>
+  <title>Diffusion q_sample · Ignasi notes</title>
   <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
 <style>
@@ -25,10 +25,25 @@
   </header>
   <main>
 
-    <h1>ML / AI</h1>
-    <p class="lead">Tiny impl tasks — foundations, LLMs, generative, RL.</p>
-    <div class="cards"><a class="card" href="/leetcode-ml-notes/ml/linear-regression.html"><span class="tag ml">ML</span><strong>Linear regression</strong><div class="meta">Fit · residuals · loss surface · plots</div></a><a class="card" href="/leetcode-ml-notes/ml/2026-09-05-softmax.html"><span class="tag ml">ML</span><strong>Stable softmax</strong><div class="meta">Stable softmax · Jupyter + plots</div></a><a class="card" href="/leetcode-ml-notes/ml/2026-09-05-temperature-sample.html"><span class="tag ml">ML</span><strong>Temperature sampling</strong><div class="meta">Temperature sampling · Jupyter + plots</div></a><a class="card" href="/leetcode-ml-notes/ml/2026-09-08-diffusion-q-sample.html"><span class="tag ml">ML</span><strong>Diffusion q_sample</strong><div class="meta">Forward noising · ᾱ_t · plots</div></a></div>
+    <h1>Diffusion q_sample</h1>
+    <p class="lead"><span class="tag ml">ML</span> Forward noising in closed form</p>
+    <h2>Insight</h2>
+    <div class="insight"><p>You never need to chain <code>t</code> tiny noise steps. With a precomputed cumulative product <code>ᾱ_t</code>, jump straight to any timestep: mix clean data with Gaussian noise in one line.</p></div>
+    <p>$$x_t=\sqrt{\bar{\alpha}_t}\,x_0+\sqrt{1-\bar{\alpha}_t}\,\varepsilon,\quad\varepsilon\sim\mathcal{N}(0,I)$$</p>
+    <h2>1. Progressive noising of a 1D signal</h2>
+    <p>Same <code>x₀</code> (faint green) with shared <code>ε</code>; as <code>t</code> grows, <code>ᾱ_t → 0</code> and the curve dissolves into noise.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/ml/assets/diffusion_xt_grid.png" alt="1D signal x0 and x_t at several timesteps showing progressive noising" /></div>
+    <h2>2. ᾱ_t schedule</h2>
+    <p>Linear <code>β</code> → <code>ᾱ_t = ∏(1-β_s)</code>. Signal weight falls; noise weight rises.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/ml/assets/diffusion_alpha_curve.png" alt="Cumulative alpha_bar_t schedule curve" /></div>
+    <h2>Code</h2>
+    <pre><code>def q_sample(x0, t, noise, alphas_cumprod):
+    a_bar = alphas_cumprod[t]
+    while a_bar.ndim &lt; x0.ndim:
+        a_bar = a_bar[..., None]
+    return np.sqrt(a_bar) * x0 + np.sqrt(1.0 - a_bar) * noise</code></pre>
 
+    <p><a href="/leetcode-ml-notes/ml/">← all ML</a></p>
   </main>
   <footer>
     <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Home · Ignasi notes</title>
+  <title>3870. Count Commas in Range · Ignasi notes</title>
   <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
 <style>
@@ -18,21 +18,27 @@
 <body>
   <header class="top">
     <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
-    <nav><a href="/leetcode-ml-notes/" class="active">Home</a>
-<a href="/leetcode-ml-notes/leetcode/" class="">LeetCode</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
 <a href="/leetcode-ml-notes/ml/" class="">ML</a>
 <a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
   </header>
   <main>
 
-    <h1>Practice notes</h1>
-    <p class="lead">LeetCode insights and tiny ML/AI impl tasks from coaching — pattern first, then code.</p>
-    <div class="grid2">
-      <a class="card" href="/leetcode-ml-notes/leetcode/"><strong>LeetCode</strong><div class="meta">10 writeups</div></a>
-      <a class="card" href="/leetcode-ml-notes/ml/"><strong>ML / AI</strong><div class="meta">4 writeups</div></a>
-      <a class="card" href="/leetcode-ml-notes/patterns/"><strong>Patterns</strong><div class="meta">cheat sheet index</div></a>
-    </div>
+    <p><a class="ext" href="https://leetcode.com/problems/count-commas-in-range/">Open on LeetCode ↗</a></p>
+    <h1>3870. Count Commas in Range</h1>
+    <p class="lead"><span class="tag">Closed form · digit groups</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>US thousands separators first appear at <code>1,000</code>. For <code>n ≤ 10⁵</code> every integer from 1000 to <code>n</code> contributes exactly one comma, so the answer is <code>max(0, n - 999)</code>.</p></div>
+    <h2>Where commas appear</h2>
+    <p>998–999 print with zero commas; 1,000–1,003 each add one. Running answer jumps from 0 → 1 → 2 → 3 → 4.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/3870_commas.png" alt="Bar chart of commas in numbers 998 through 1003" /></div>
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def countCommas(self, n: int) -&gt; int:
+        return max(0, n - 999)</code></pre>
 
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
   </main>
   <footer>
     <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
