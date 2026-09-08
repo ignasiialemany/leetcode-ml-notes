@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smallest Stable Index II · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/smallest-stable-index-ii/">Open on LeetCode ↗</a></p>
+    <h1>3904. Smallest Stable Index II</h1>
+    <p class="lead"><span class="tag">Prefix max + suffix min</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>Score at i is max(prefix≤i)−min(suffix≥i). Build pref L→R and suf R→L, then first i with pref[i]-suf[i]≤k.</p></div>
+    <h2>Pattern</h2>
+    <div class="pattern"><p>Prefix max + suffix min</p></div>
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def firstStableIndex(self, nums, k):
+        n = len(nums)
+        pref, suf = [0]*n, [0]*n
+        pref[0] = nums[0]
+        for i in range(1, n):
+            pref[i] = max(pref[i-1], nums[i])
+        suf[-1] = nums[-1]
+        for i in range(n-2, -1, -1):
+            suf[i] = min(suf[i+1], nums[i])
+        for i in range(n):
+            if pref[i] - suf[i] &lt;= k: return i
+        return -1</code></pre>
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>

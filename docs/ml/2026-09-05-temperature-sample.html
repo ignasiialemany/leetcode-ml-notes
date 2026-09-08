@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Temperature sampling · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="active">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <h1>Temperature sampling</h1>
+    <p class="lead"><span class="tag ml">Temperature sampling</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>sample from softmax(z/T). Small T stretches gaps (near-greedy); large T flattens. Clamp tiny T to argmax.</p></div>
+    <h2>Code</h2>
+    <pre><code>import numpy as np
+
+def softmax(z):
+    z = np.asarray(z, dtype=np.float64)
+    z = z - np.max(z)
+    e = np.exp(z)
+    return e / e.sum()
+
+def sample(z, T, rng):
+    z = np.asarray(z, dtype=np.float64)
+    if T &lt;= 1e-8:
+        return int(np.argmax(z))
+    return int(rng.choice(len(z), p=softmax(z / T)))</code></pre>
+    <p><a href="/leetcode-ml-notes/ml/">← all ML</a></p>
+
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>

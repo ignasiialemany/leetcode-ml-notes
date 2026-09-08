@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Container With Most Water · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/container-with-most-water/">Open on LeetCode ↗</a></p>
+    <h1>11. Container With Most Water</h1>
+    <p class="lead"><span class="tag">Two pointers from both ends</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>Start wide. Area=(j-i)*min(h[i],h[j]). Always advance the shorter end — every remaining pair using it is worse.</p></div>
+    <h2>Pattern</h2>
+    <div class="pattern"><p>Two pointers from both ends</p></div>
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def maxArea(self, height):
+        i, j, best = 0, len(height) - 1, 0
+        while i &lt; j:
+            hi, hj = height[i], height[j]
+            best = max(best, (j - i) * min(hi, hj))
+            if hi &lt;= hj: i += 1
+            else: j -= 1
+        return best</code></pre>
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>

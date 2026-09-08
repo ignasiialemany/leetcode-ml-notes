@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Removing Minimum and Maximum From Array · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/removing-minimum-and-maximum-from-array/">Open on LeetCode ↗</a></p>
+    <h1>2091. Removing Minimum and Maximum From Array</h1>
+    <p class="lead"><span class="tag">Cover two positions from the ends</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>Only front/back deletes. After finding i_min and i_max, answer is min(both from left, both from right, one each). Remember +1 for 0-index.</p></div>
+    <h2>Pattern</h2>
+    <div class="pattern"><p>Cover two positions from the ends</p></div>
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def minimumDeletions(self, nums):
+        n = len(nums)
+        i_min = i_max = 0
+        for i, x in enumerate(nums):
+            if x &lt; nums[i_min]: i_min = i
+            if x &gt; nums[i_max]: i_max = i
+        a, b = sorted((i_min, i_max))
+        return min(b + 1, n - a, a + 1 + n - b)</code></pre>
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>

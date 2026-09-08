@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Distinct Subsequences II · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/distinct-subsequences-ii/">Open on LeetCode ↗</a></p>
+    <h1>940. Distinct Subsequences II</h1>
+    <p class="lead"><span class="tag">Distinct subsequences of one string</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>No target string. Keep ends[c]=# distinct subs ending with c. On c: ends[c]=sum(ends)+1 (overwrite). That is 2*total+1−old_ends[c] in disguise.</p></div>
+    <h2>Pattern</h2>
+    <div class="pattern"><p>Distinct subsequences of one string</p></div>
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def distinctSubseqII(self, s):
+        MOD = 10**9 + 7
+        ends = [0] * 26
+        for ch in s:
+            i = ord(ch) - ord(&#x27;a&#x27;)
+            ends[i] = (sum(ends) + 1) % MOD
+        return sum(ends) % MOD</code></pre>
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>

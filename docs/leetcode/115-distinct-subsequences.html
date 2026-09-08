@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Distinct Subsequences · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/distinct-subsequences/">Open on LeetCode ↗</a></p>
+    <h1>115. Distinct Subsequences</h1>
+    <p class="lead"><span class="tag">Count ways along two sequences</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>State (i in s, j in t). Skip always; take on match. Put a pointer in the *target* on day one — generating all subsequences of s then filtering explodes.</p></div>
+    <h2>Pattern</h2>
+    <div class="pattern"><p>Count ways along two sequences</p></div>
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def numDistinct(self, s, t):
+        m, n = len(s), len(t)
+        dp = [[0]*(n+1) for _ in range(m+1)]
+        for i in range(m+1):
+            dp[i][0] = 1
+        for i in range(1, m+1):
+            for j in range(1, n+1):
+                dp[i][j] = dp[i-1][j]
+                if s[i-1] == t[j-1]:
+                    dp[i][j] += dp[i-1][j-1]
+        return dp[m][n]</code></pre>
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>

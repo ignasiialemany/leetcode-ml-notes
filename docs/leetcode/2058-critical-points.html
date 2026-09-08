@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Find the Minimum and Maximum Number of Nodes Between Critical Points · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/find-the-minimum-and-maximum-number-of-nodes-between-critical-points/">Open on LeetCode ↗</a></p>
+    <h1>2058. Find the Minimum and Maximum Number of Nodes Between Critical Points</h1>
+    <p class="lead"><span class="tag">Extrema along a line</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>Critical = strict local min/max (ends never). Min distance = closest consecutive criticals; max = first vs last. Stream first/prev/min_gap for O(1) extra space.</p></div>
+    <h2>Pattern</h2>
+    <div class="pattern"><p>Extrema along a line</p></div>
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def nodesBetweenCriticalPoints(self, head):
+        first = prev_c = None
+        min_d = 10**9
+        prev, curr, idx = head, head.next, 1
+        while curr and curr.next:
+            if ((curr.val &gt; prev.val and curr.val &gt; curr.next.val) or
+                (curr.val &lt; prev.val and curr.val &lt; curr.next.val)):
+                if first is None: first = idx
+                else: min_d = min(min_d, idx - prev_c)
+                prev_c = idx
+            prev, curr, idx = curr, curr.next, idx + 1
+        if first is None or prev_c == first: return [-1, -1]
+        return [min_d, prev_c - first]</code></pre>
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>
