@@ -544,6 +544,63 @@ def plot_3904():
     save(fig, "3904_prefsuf.png")
 
 
+# ── 3871 threshold contributions ────────────────────────────────────────────
+def plot_3871():
+    n = 2_000_000
+    thresholds = []
+    t = 1000
+    while t <= n:
+        thresholds.append(t)
+        t *= 1000
+    contribs = [n - T + 1 for T in thresholds]
+    total = sum(contribs)
+
+    def fmt_T(T):
+        if T >= 1_000_000_000:
+            return f"{T // 1_000_000_000}e9"
+        if T >= 1_000_000:
+            return f"{T // 1_000_000}e6"
+        return f"{T:,}"
+
+    labels = [fmt_T(T) for T in thresholds]
+    colors = [ACCENT, ACCENT2, WARN, "#c792ea"][: len(thresholds)]
+
+    fig, ax = plt.subplots(figsize=(9, 5.2))
+    x = np.arange(len(thresholds))
+    bars = ax.bar(x, contribs, color=colors, edgecolor=BORDER, width=0.55, zorder=3)
+    for bar, c in zip(bars, contribs):
+        ax.text(
+            bar.get_x() + bar.get_width() / 2,
+            c + max(contribs) * 0.02,
+            f"{c:,}\n= n−T+1",
+            ha="center",
+            va="bottom",
+            color=TEXT,
+            fontsize=10,
+            fontweight="bold",
+        )
+    ax.annotate(
+        f"total = {' + '.join(f'{c:,}' for c in contribs)} = {total:,}",
+        xy=(0.5, 0.92),
+        xycoords="axes fraction",
+        ha="center",
+        va="top",
+        color=ACCENT2,
+        fontsize=11,
+        fontweight="bold",
+        bbox=dict(boxstyle="round,pad=0.4", facecolor=PANEL, edgecolor=BORDER),
+    )
+    style_ax(ax, f"3871 · threshold contributions  n={n:,}")
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"T={lab}" for lab in labels], color=TEXT, fontsize=12)
+    ax.set_xlabel("threshold T ∈ {1000, 1e6, 1e9, …}", color=MUTED)
+    ax.set_ylabel("commas added  (n − T + 1)", color=MUTED)
+    ax.set_ylim(0, max(contribs) * 1.22)
+    ax.grid(axis="y", alpha=0.12, color=MUTED, zorder=0)
+    save(fig, "3871_thresholds.png")
+
+
+
 def main():
     plot_115()
     plot_940()
@@ -554,6 +611,7 @@ def main():
     plot_3568()
     plot_3875()
     plot_3904()
+    plot_3871()
     print("---")
     for p in sorted(OUT.glob("*.png")):
         print(f"{p.stat().st_size:8d}  {p.name}")

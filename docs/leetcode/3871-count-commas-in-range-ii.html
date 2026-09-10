@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>3871. Count Commas in Range II · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/count-commas-in-range-ii/">Open on LeetCode ↗</a></p>
+    <h1>3871. Count Commas in Range II</h1>
+    <p class="lead"><span class="tag">Threshold sum · O(log n)</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>Every threshold \(T \in \{10^3, 10^6, 10^9, \ldots\}\) adds one more comma to every integer \(\ge T\). So for each \(T \le n\) add \(n - T + 1\), then stop — \(n\) up to \(10^{15}\) needs only a handful of thresholds.</p></div>
+    <h2>Contributions per threshold</h2>
+    <p>Toy \(n = 2{,}000{,}000\): \(T=1000\) contributes \(1{,}999{,}001\); \(T=10^6\) contributes \(1{,}000{,}001\). Sum \(= 2{,}999{,}002\).</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/3871_thresholds.png" alt="Bar chart of comma contributions per threshold for n=2,000,000" /></div>
+    <p class="caption">Each bar is \(n-T+1\). Larger \(n\) just keeps multiplying \(T\) by \(1000\) until it exceeds \(n\).</p>
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def countCommas(self, n: int) -&gt; int:
+        ans, t = 0, 1000
+        while t &lt;= n:
+            ans += n - t + 1
+            t *= 1000
+        return ans</code></pre>
+
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>
