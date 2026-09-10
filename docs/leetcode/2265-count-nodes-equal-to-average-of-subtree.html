@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>2265. Count Nodes Equal to Average of Subtree · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/count-nodes-equal-to-average-of-subtree/">Open on LeetCode ↗</a></p>
+    <h1>2265. Count Nodes Equal to Average of Subtree</h1>
+    <p class="lead"><span class="tag">Post-order DFS · (sum, size)</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>Average needs both subtree sum and subtree size. Post-order DFS returns \((\textit{sum}, \textit{size})\) from each child; combine with the current node, then check \(\textit{val} = \lfloor \textit{sum}/\textit{size} \rfloor\). One pass, \(O(n)\).</p></div>
+    <h2>Post-order annotations</h2>
+    <p>Example \([4,8,5,0,1,\text{null},6]\): green nodes match. Node \(8\) is the only miss — \(\lfloor 9/3 \rfloor = 3 \neq 8\). Answer \(= 5\).</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/2265_postorder.png" alt="Binary tree with (sum,size) labels; five matching nodes highlighted" /></div>
+    <p class="caption">Each label is the \((\textit{sum}, \textit{size})\) pair the DFS returns for that subtree.</p>
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def averageOfSubtree(self, root: Optional[TreeNode]) -&gt; int:
+        ans = 0
+        def dfs(node):
+            nonlocal ans
+            if not node:
+                return 0, 0
+            ls, ln = dfs(node.left)
+            rs, rn = dfs(node.right)
+            s, n = ls + rs + node.val, ln + rn + 1
+            if s // n == node.val:
+                ans += 1
+            return s, n
+        dfs(root)
+        return ans</code></pre>
+
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>

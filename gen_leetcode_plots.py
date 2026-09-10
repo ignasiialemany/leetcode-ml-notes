@@ -601,6 +601,103 @@ def plot_3871():
 
 
 
+
+
+# ── 2265 post-order (sum, size) tree ────────────────────────────────────────
+def plot_2265():
+    # Example root = [4,8,5,0,1,null,6]
+    # Matching nodes: 4,5,0,1,6 (5 total). Node 8: floor(9/3)=3 ≠ 8.
+    nodes = {
+        "4": {"val": 4, "pos": (0.0, 3.0), "sum": 24, "size": 6, "match": True, "parent": None},
+        "8": {"val": 8, "pos": (-1.6, 2.0), "sum": 9, "size": 3, "match": False, "parent": "4"},
+        "5": {"val": 5, "pos": (1.6, 2.0), "sum": 11, "size": 2, "match": True, "parent": "4"},
+        "0": {"val": 0, "pos": (-2.4, 1.0), "sum": 0, "size": 1, "match": True, "parent": "8"},
+        "1": {"val": 1, "pos": (-0.8, 1.0), "sum": 1, "size": 1, "match": True, "parent": "8"},
+        "6": {"val": 6, "pos": (2.4, 1.0), "sum": 6, "size": 1, "match": True, "parent": "5"},
+    }
+
+    fig, ax = plt.subplots(figsize=(10, 7.2))
+    ax.set_facecolor(BG)
+
+    for nid, n in nodes.items():
+        if n["parent"] is None:
+            continue
+        p = nodes[n["parent"]]
+        ax.plot(
+            [p["pos"][0], n["pos"][0]],
+            [p["pos"][1], n["pos"][1]],
+            color=BORDER,
+            linewidth=2.2,
+            zorder=1,
+            solid_capstyle="round",
+        )
+
+    r = 0.32
+    for nid, n in nodes.items():
+        x, y = n["pos"]
+        face = ACCENT2 if n["match"] else PANEL
+        edge = ACCENT2 if n["match"] else ACCENT
+        lw = 2.8 if n["match"] else 2.0
+        circ = mpatches.Circle((x, y), r, facecolor=face, edgecolor=edge, linewidth=lw, zorder=3)
+        ax.add_patch(circ)
+        val_color = BG if n["match"] else TEXT
+        ax.text(
+            x, y, str(n["val"]), ha="center", va="center", color=val_color,
+            fontsize=16, fontweight="bold", zorder=4,
+        )
+        label = f"({n['sum']},{n['size']})"
+        label_color = ACCENT2 if n["match"] else MUTED
+        ax.text(
+            x, y - r - 0.18, label, ha="center", va="top", color=label_color,
+            fontsize=11, fontfamily="monospace", zorder=4,
+        )
+
+    ax.axis("off")
+    ax.set_title(
+        "2265 · post-order (sum, size)  ·  root=[4,8,5,0,1,null,6]  →  5 matches",
+        color=TEXT, fontsize=13, pad=14,
+    )
+
+    legend_items = [
+        mpatches.Patch(facecolor=ACCENT2, edgecolor=ACCENT2, label="match: val == ⌊sum/size⌋"),
+        mpatches.Patch(facecolor=PANEL, edgecolor=ACCENT, label="no match (node 8: ⌊9/3⌋=3)"),
+    ]
+    ax.legend(
+        handles=legend_items,
+        loc="lower center",
+        bbox_to_anchor=(0.5, -0.02),
+        frameon=True,
+        facecolor=PANEL,
+        edgecolor=BORDER,
+        labelcolor=TEXT,
+        fontsize=10,
+        ncol=2,
+    )
+    ax.annotate(
+        "8 ≠ 3",
+        xy=(-1.6, 2.0 + r),
+        xytext=(-2.9, 2.55),
+        color=WARN,
+        fontsize=11,
+        fontweight="bold",
+        arrowprops=dict(arrowstyle="->", color=WARN, lw=1.4),
+        zorder=5,
+    )
+    ax.set_xlim(-3.6, 3.6)
+    ax.set_ylim(0.35, 3.7)
+    ax.set_aspect("equal")
+    ax.text(
+        0.5, 0.02,
+        "each label is (subtree_sum, subtree_size) returned by post-order DFS",
+        transform=ax.transAxes,
+        ha="center",
+        va="bottom",
+        color=MUTED,
+        fontsize=9,
+    )
+    save(fig, "2265_postorder.png")
+
+
 def main():
     plot_115()
     plot_940()
@@ -612,6 +709,7 @@ def main():
     plot_3875()
     plot_3904()
     plot_3871()
+    plot_2265()
     print("---")
     for p in sorted(OUT.glob("*.png")):
         print(f"{p.stat().st_size:8d}  {p.name}")
