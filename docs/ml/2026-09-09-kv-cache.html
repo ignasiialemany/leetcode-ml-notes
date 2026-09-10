@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KV-cache decode · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="active">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <h1>KV-cache decode</h1>
+    <p class="lead"><span class="tag ml">ML</span> Autoregressive attention reusing cached K/V</p>
+    <h2>Insight</h2>
+    <div class="insight"><p>Cache <strong>K</strong> and <strong>V</strong>, not the attention matrix <strong>A</strong>. Each decode step only materializes a new query <code>q_t</code> (and the new key/value to append); scores are <code>q_t</code> against the full cached keys.</p></div>
+    <p>$$\mathrm{out}_t=\mathrm{softmax}\!\left(\frac{q_t K_{\le t}^\top}{\sqrt{d}}\right)V_{\le t},\quad K_{\le t}=[K_{\lt t};k_t],\; V_{\le t}=[V_{\lt t};v_t]$$</p>
+    <h2>1. Cache grows; query is new</h2>
+    <p>After each step the K/V tensors lengthen by one along the sequence axis. Past keys/values stay put — only <code>q_t</code> is computed fresh for attention.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/ml/assets/kv_cache_grow.png" alt="Schematic of KV cache length growing from T=0 to T=2 with only new q_t used each step" /></div>
+    <h2>2. Attention over cached positions</h2>
+    <p>One decode step: softmax weights from <code>q_t</code> over all cached keys. Peak position highlighted; dashed line is uniform <code>1/T</code>.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/ml/assets/kv_cache_attention.png" alt="Bar chart and heatmap of attention weights from one decode step over cached KV positions" /></div>
+    <h2>Code</h2>
+    <pre><code>def kv_cache_step(q_t, k_t, v_t, K, V):
+    K_new = np.concatenate([K, k_t], axis=2)
+    V_new = np.concatenate([V, v_t], axis=2)
+    scale = np.sqrt(q_t.shape[-1])
+    scores = (q_t @ np.swapaxes(K_new, -1, -2)) / scale
+    out = softmax_last(scores) @ V_new
+    return out, K_new, V_new</code></pre>
+
+    <p><a href="/leetcode-ml-notes/ml/">← all ML</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>
