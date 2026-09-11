@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>3483. Unique 3-Digit Even Numbers · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/unique-3-digit-even-numbers/">Open on LeetCode ↗</a></p>
+    <h1>3483. Unique 3-Digit Even Numbers</h1>
+    <p class="lead"><span class="tag">Enumerate under tiny n</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>\(n \le 10\), so just generate length-3 permutations of the digit multiset. Keep those with hundreds \(\neq 0\) and units even; drop formed values into a set. No digit DP.</p></div>
+    <h2>Enumerate &amp; filter</h2>
+    <p>Example <code>digits=[1,2,3,4]</code>: twelve distinct even numbers (e.g. 124, 132, …, 432). Rejects are leading zero, odd units, or reusing a copy.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/3483_enumerate.png" alt="Digit pool, three-slot constraints, valid vs invalid 3-digit even numbers for digits=[1,2,3,4]" /></div>
+    <p class="caption">Filter \(a \neq 0\) and \(c\) even; count unique \(100a+10b+c\).</p>
+    <h2>Code</h2>
+    <pre><code>from itertools import permutations
+from typing import List
+
+class Solution:
+    def totalNumbers(self, digits: List[int]) -&gt; int:
+        seen = set()
+        for a, b, c in permutations(digits, 3):
+            if a and c % 2 == 0:
+                seen.add(100 * a + 10 * b + c)
+        return len(seen)</code></pre>
+
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>

@@ -698,6 +698,116 @@ def plot_2265():
     save(fig, "2265_postorder.png")
 
 
+# ── 3483 enumerate 3-digit even ─────────────────────────────────────────────
+def plot_3483():
+    from matplotlib.patches import FancyBboxPatch
+
+    fig, ax = plt.subplots(figsize=(11.2, 7.4))
+    ax.set_facecolor(BG)
+    ax.set_xlim(0, 11.2)
+    ax.set_ylim(0, 7.4)
+    ax.axis("off")
+    ax.set_title(
+        "3483 · Unique 3-Digit Even Numbers  ·  digits=[1,2,3,4]",
+        color=TEXT, fontsize=14, pad=12, loc="left", x=0.02, y=1.0,
+    )
+
+    ax.text(0.4, 6.85, "digit pool (each copy once)", color=MUTED, fontsize=10, va="center")
+    for i, d in enumerate([1, 2, 3, 4]):
+        x = 0.5 + i * 0.85
+        ax.add_patch(
+            FancyBboxPatch(
+                (x, 6.15), 0.7, 0.55,
+                boxstyle="round,pad=0.04,rounding_size=0.12",
+                facecolor=PANEL, edgecolor=ACCENT, linewidth=1.8, zorder=3,
+            )
+        )
+        ax.text(x + 0.35, 6.42, str(d), ha="center", va="center", color=TEXT,
+                fontsize=16, fontweight="bold", zorder=4)
+
+    ax.text(5.5, 6.85, "3 slots · constraints", color=MUTED, fontsize=10, va="center")
+    for label, rule, x in [("hundreds", "≠ 0", 5.3), ("tens", "any", 7.15), ("units", "even", 9.0)]:
+        ax.add_patch(
+            FancyBboxPatch(
+                (x, 6.05), 1.55, 0.75,
+                boxstyle="round,pad=0.04,rounding_size=0.12",
+                facecolor=PANEL, edgecolor=ACCENT2 if rule != "any" else BORDER,
+                linewidth=2.0, zorder=3,
+            )
+        )
+        ax.text(x + 0.775, 6.55, label, ha="center", va="center", color=TEXT,
+                fontsize=11, fontweight="bold", zorder=4)
+        ax.text(x + 0.775, 6.22, rule, ha="center", va="center",
+                color=ACCENT2 if rule != "any" else MUTED, fontsize=10, zorder=4)
+    ax.annotate("", xy=(5.2, 6.4), xytext=(4.0, 6.4),
+                arrowprops=dict(arrowstyle="->", color=BORDER, lw=1.6))
+
+    ax.text(0.4, 5.55, "valid (green) — form number, put in a set", color=ACCENT2,
+            fontsize=11, fontweight="bold")
+    valids = [
+        ([1, 2, 4], "124"), ([1, 3, 2], "132"), ([2, 1, 4], "214"),
+        ([3, 4, 2], "342"), ([4, 1, 2], "412"), ([4, 3, 2], "432"),
+    ]
+    for i, (digits, num) in enumerate(valids):
+        row, col = divmod(i, 3)
+        x0 = 0.4 + col * 3.6
+        y0 = 4.55 - row * 0.95
+        for j, d in enumerate(digits):
+            face = ACCENT2 if j in (0, 2) else PANEL
+            edge = ACCENT2 if j in (0, 2) else ACCENT
+            tc = BG if j in (0, 2) else TEXT
+            ax.add_patch(
+                FancyBboxPatch(
+                    (x0 + j * 0.55, y0), 0.48, 0.55,
+                    boxstyle="round,pad=0.02,rounding_size=0.08",
+                    facecolor=face, edgecolor=edge, linewidth=1.6, zorder=3,
+                )
+            )
+            ax.text(x0 + j * 0.55 + 0.24, y0 + 0.27, str(d), ha="center", va="center",
+                    color=tc, fontsize=13, fontweight="bold", zorder=4)
+        ax.text(x0 + 1.8, y0 + 0.27, f"= {num}", ha="left", va="center",
+                color=ACCENT2, fontsize=12, fontfamily="monospace", zorder=4)
+
+    ax.text(0.4, 2.55, "invalid (red / amber) — rejected by filters", color=CRIT,
+            fontsize=11, fontweight="bold")
+    invalids = [
+        ([0, 1, 2], "leading zero", CRIT, "needs a 0 in digits"),
+        ([1, 2, 3], "odd units", WARN, "c % 2 ≠ 0"),
+        ([1, 1, 2], "reuse copy", CRIT, "only one 1 in pool"),
+    ]
+    for i, (digits, reason, color, detail) in enumerate(invalids):
+        x0 = 0.4 + i * 3.6
+        y0 = 1.35
+        for j, d in enumerate(digits):
+            ax.add_patch(
+                FancyBboxPatch(
+                    (x0 + j * 0.55, y0), 0.48, 0.55,
+                    boxstyle="round,pad=0.02,rounding_size=0.08",
+                    facecolor=PANEL, edgecolor=color, linewidth=1.6, zorder=3,
+                )
+            )
+            ax.text(x0 + j * 0.55 + 0.24, y0 + 0.27, str(d), ha="center", va="center",
+                    color=TEXT, fontsize=13, fontweight="bold", zorder=4)
+        ax.text(x0 + 1.8, y0 + 0.42, reason, ha="left", va="center",
+                color=color, fontsize=11, fontweight="bold", zorder=4)
+        ax.text(x0 + 1.8, y0 + 0.12, detail, ha="left", va="center",
+                color=MUTED, fontsize=9, zorder=4)
+
+    ax.add_patch(
+        FancyBboxPatch(
+            (0.3, 0.25), 10.6, 0.75,
+            boxstyle="round,pad=0.04,rounding_size=0.1",
+            facecolor=PANEL, edgecolor=BORDER, linewidth=1.2, zorder=2,
+        )
+    )
+    ax.text(
+        5.6, 0.62,
+        "n ≤ 10 → enumerate permutations(digits, 3); filter a≠0 and c even; count unique 100a+10b+c",
+        ha="center", va="center", color=TEXT, fontsize=11, zorder=3,
+    )
+    save(fig, "3483_enumerate.png")
+
+
 def main():
     plot_115()
     plot_940()
@@ -710,6 +820,7 @@ def main():
     plot_3904()
     plot_3871()
     plot_2265()
+    plot_3483()
     print("---")
     for p in sorted(OUT.glob("*.png")):
         print(f"{p.stat().st_size:8d}  {p.name}")
