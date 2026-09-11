@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ML · Ignasi notes</title>
+  <title>LayerNorm · Ignasi notes</title>
   <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
 <style>
@@ -25,10 +25,26 @@
   </header>
   <main>
 
-    <h1>ML / AI</h1>
-    <p class="lead">Tiny impl tasks — foundations, LLMs, generative, RL.</p>
-    <div class="cards"><a class="card" href="/leetcode-ml-notes/ml/2026-09-10-layernorm.html"><span class="tag ml">ML</span><strong>LayerNorm</strong><div class="meta">Last-axis mean/var · γ,β · plots</div></a><a class="card" href="/leetcode-ml-notes/ml/linear-regression.html"><span class="tag ml">ML</span><strong>Linear regression</strong><div class="meta">Fit · residuals · loss surface · plots</div></a><a class="card" href="/leetcode-ml-notes/ml/2026-09-05-softmax.html"><span class="tag ml">ML</span><strong>Stable softmax</strong><div class="meta">Stable softmax · Jupyter + plots</div></a><a class="card" href="/leetcode-ml-notes/ml/2026-09-05-temperature-sample.html"><span class="tag ml">ML</span><strong>Temperature sampling</strong><div class="meta">Temperature sampling · Jupyter + plots</div></a><a class="card" href="/leetcode-ml-notes/ml/2026-09-08-diffusion-q-sample.html"><span class="tag ml">ML</span><strong>Diffusion q_sample</strong><div class="meta">Forward noising · ᾱ_t · plots</div></a><a class="card" href="/leetcode-ml-notes/ml/2026-09-09-kv-cache.html"><span class="tag ml">ML</span><strong>KV-cache decode</strong><div class="meta">Cache K/V · decode step · plots</div></a></div>
+    <h1>LayerNorm</h1>
+    <p class="lead"><span class="tag ml">ML</span> Normalize last-axis features, then affine</p>
+    <h2>Insight</h2>
+    <div class="insight"><p>Per vector along the last dim: subtract mean, divide by std, then stretch with learnable \(\gamma,\beta\). Stabilizes scale across tokens / Q embeddings; the affine restores capacity so the network is not stuck at unit variance.</p></div>
+    <p>$$\hat x=\frac{x-\mu}{\sqrt{\sigma^2+\varepsilon}},\qquad y=\gamma\odot\hat x+\beta$$</p>
+    <h2>1. Normalize last axis</h2>
+    <p>Mean and variance are over \(D\) features for each row (token). After normalize, that vector sits near mean 0 / var 1.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/ml/assets/layernorm_before_after.png" alt="Feature vector before and after LayerNorm normalize step" /></div>
+    <p class="caption">Blue = raw \(x\); green = \(\hat x\).</p>
+    <h2>2. Affine restores capacity</h2>
+    <p>\(\gamma\) and \(\beta\) (shape \(D\)) re-scale and shift per channel so the layer can still represent arbitrary scales.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/ml/assets/layernorm_affine.png" alt="Normalized features vs after gamma beta affine" /></div>
+    <h2>Code</h2>
+    <pre><code>def layer_norm(x, gamma, beta, eps=1e-5):
+    mean = x.mean(axis=-1, keepdims=True)
+    var = x.var(axis=-1, keepdims=True)
+    x_hat = (x - mean) / np.sqrt(var + eps)
+    return gamma * x_hat + beta</code></pre>
 
+    <p><a href="/leetcode-ml-notes/ml/">← all ML</a></p>
   </main>
   <footer>
     <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
