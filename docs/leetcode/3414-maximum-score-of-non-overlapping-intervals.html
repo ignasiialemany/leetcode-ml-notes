@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>3414. Maximum Score of Non-overlapping Intervals · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/maximum-score-of-non-overlapping-intervals/">Open on LeetCode ↗</a></p>
+    <h1>3414. Maximum Score of Non-overlapping Intervals</h1>
+    <p class="lead"><span class="tag">Weighted intervals · pick ≤k</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>\(k \le 4\) and \(n \le 5\cdot10^4\): sort by end, binary-search the previous interval with \(\mathrm{end} &lt; \mathrm{start}\) (shared endpoint overlaps), then DP \(\mathrm{take}[i][t]\) for \(t=1..k\). Keep \((\mathrm{score}, \mathrm{sorted\ indices})\) and break ties by lexicographically smaller index tuples.</p></div>
+    <h2>Visual</h2>
+    <p>Example 1: indices \(2\) and \(3\) give weight \(5+3=8\). Note \([1,5]\) blocks both \([1,3]\) and \([4,5]\) because closed intervals share points.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/3414_intervals.png" alt="Timeline of six intervals; chosen indices 2 and 3 highlighted" /></div>
+    <p class="caption">Sort by end → DP with at most 4 picks → lex-smallest index list among max-score sets.</p>
+    <h2>Code</h2>
+    <pre><code>from bisect import bisect_left
+from typing import List, Optional, Tuple
+
+
+class Solution:
+    def maximumWeight(self, intervals: List[List[int]]) -&gt; List[int]:
+        n = len(intervals)
+        arr = [
+            (intervals[i][1], intervals[i][0], intervals[i][2], i) for i in range(n)
+        ]
+        arr.sort()
+        ends = [r for r, _, _, _ in arr]
+        prev = [bisect_left(ends, arr[i][1]) - 1 for i in range(n)]
+
+        NEG = -(10**30)
+        take: List[List[Tuple[int, Optional[Tuple[int, ...]]]]] = [
+            [(NEG, None) for _ in range(5)] for _ in range(n)
+        ]
+        prefix: List[List[Tuple[int, Optional[Tuple[int, ...]]]]] = [
+            [(NEG, None) for _ in range(5)] for _ in range(n)
+        ]
+
+        def better(a, b):
+            sa, ia = a
+            sb, ib = b
+            if ia is None:
+                return b
+            if ib is None:
+                return a
+            if sa != sb:
+                return a if sa &gt; sb else b
+            return a if ia &lt; ib else b
+
+        for i in range(n):
+            _, _, w, idx = arr[i]
+            take[i][1] = (w, (idx,))
+            p = prev[i]
+            if p &gt;= 0:
+                for k in range(2, 5):
+                    sc, idxs = prefix[p][k - 1]
+                    if idxs is not None:
+                        take[i][k] = (sc + w, tuple(sorted(idxs + (idx,))))
+            for k in range(1, 5):
+                prefix[i][k] = (
+                    take[i][k] if i == 0 else better(take[i][k], prefix[i - 1][k])
+                )
+
+        best: Tuple[int, Tuple[int, ...]] = (0, ())
+        for k in range(1, 5):
+            sc, idxs = prefix[n - 1][k]
+            if idxs is not None:
+                cand = (sc, idxs)
+                if cand[0] &gt; best[0] or (cand[0] == best[0] and cand[1] &lt; best[1]):
+                    best = cand
+        return list(best[1])</code></pre>
+
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>
