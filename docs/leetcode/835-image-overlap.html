@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>835. Image Overlap · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/image-overlap/">Open on LeetCode ↗</a></p>
+    <h1>835. Image Overlap</h1>
+    <p class="lead"><span class="tag">Count votes for a relative transform</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>Every pair of ones \((p_1, p_2)\) votes for one translation vector \(p_1 - p_2\). The vector with the most votes is the best overlap. With \(n \le 30\), pairing the ones beats sliding the full matrix over all shifts.</p></div>
+    <h2>Visual</h2>
+    <p>Example 1: shift img1 by \(+1\) row and \(+1\) column. Three ones land on ones in img2.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/835_overlap.png" alt="img1, img2, and img1 after +1,+1 shift with three overlapping ones in red" /></div>
+    <p class="caption">Same three pairs cast the same \((\Delta r, \Delta c)\) vote — that count is the answer.</p>
+    <h2>Code</h2>
+    <pre><code>from collections import Counter
+from typing import List
+
+
+class Solution:
+    def largestOverlap(self, img1: List[List[int]], img2: List[List[int]]) -&gt; int:
+        n = len(img1)
+        ones1 = [(r, c) for r in range(n) for c in range(n) if img1[r][c]]
+        ones2 = [(r, c) for r in range(n) for c in range(n) if img2[r][c]]
+        if not ones1 or not ones2:
+            return 0
+        cnt = Counter((r1 - r2, c1 - c2) for r1, c1 in ones1 for r2, c2 in ones2)
+        return max(cnt.values())
+</code></pre>
+  </main>
+</body>
+</html>
