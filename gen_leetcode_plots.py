@@ -808,6 +808,49 @@ def plot_3483():
     save(fig, "3483_enumerate.png")
 
 
+
+
+# ── 836 rectangle overlap (strict AABB) ─────────────────────────────────────
+def plot_836():
+    fig, axes = plt.subplots(1, 2, figsize=(11, 5.2), gridspec_kw={"width_ratios": [1.35, 1]})
+
+    ax = axes[0]
+    rec1, rec2 = (0, 0, 2, 2), (1, 1, 3, 3)
+    ox1, oy1 = max(rec1[0], rec2[0]), max(rec1[1], rec2[1])
+    ox2, oy2 = min(rec1[2], rec2[2]), min(rec1[3], rec2[3])
+    ax.add_patch(mpatches.Rectangle((rec1[0], rec1[1]), 2, 2, facecolor=ACCENT, alpha=0.35, edgecolor=ACCENT, linewidth=2.2, zorder=2, label="rec1 [0,0,2,2]"))
+    ax.add_patch(mpatches.Rectangle((rec2[0], rec2[1]), 2, 2, facecolor=ACCENT2, alpha=0.35, edgecolor=ACCENT2, linewidth=2.2, zorder=2, label="rec2 [1,1,3,3]"))
+    ax.add_patch(mpatches.Rectangle((ox1, oy1), ox2 - ox1, oy2 - oy1, facecolor=WARN, alpha=0.55, edgecolor=WARN, linewidth=2.0, zorder=3, label="overlap (area>0)"))
+    ax.text((ox1 + ox2) / 2, (oy1 + oy2) / 2, "area > 0\n→ True", ha="center", va="center", color=TEXT, fontsize=11, fontweight="bold", zorder=4)
+    ax.set_xlim(-0.4, 3.6)
+    ax.set_ylim(-0.4, 3.6)
+    ax.set_aspect("equal")
+    ax.set_xlabel("x", color=MUTED)
+    ax.set_ylabel("y", color=MUTED)
+    style_ax(ax, "positive-area overlap → True")
+    ax.grid(True, alpha=0.12, color=MUTED)
+    ax.legend(facecolor=PANEL, edgecolor=BORDER, labelcolor=TEXT, fontsize=8, loc="upper left")
+
+    ax2 = axes[1]
+    e1, e2 = (0, 0, 1, 1), (1, 0, 2, 1)
+    ax2.add_patch(mpatches.Rectangle((e1[0], e1[1]), 1, 1, facecolor=ACCENT, alpha=0.4, edgecolor=ACCENT, linewidth=2.2, zorder=2, label="rec1 [0,0,1,1]"))
+    ax2.add_patch(mpatches.Rectangle((e2[0], e2[1]), 1, 1, facecolor=ACCENT2, alpha=0.4, edgecolor=ACCENT2, linewidth=2.2, zorder=2, label="rec2 [1,0,2,1]"))
+    ax2.plot([1, 1], [0, 1], color=CRIT, linewidth=3.2, zorder=4, label="shared edge")
+    ax2.text(1.0, 1.25, "edge touch\n→ False", ha="center", va="bottom", color=CRIT, fontsize=11, fontweight="bold")
+    ax2.set_xlim(-0.35, 2.45)
+    ax2.set_ylim(-0.35, 1.85)
+    ax2.set_aspect("equal")
+    ax2.set_xlabel("x", color=MUTED)
+    ax2.set_ylabel("y", color=MUTED)
+    style_ax(ax2, "edge / corner touch → False")
+    ax2.grid(True, alpha=0.12, color=MUTED)
+    ax2.legend(facecolor=PANEL, edgecolor=BORDER, labelcolor=TEXT, fontsize=8, loc="upper right")
+
+    fig.suptitle("836 · Axis-aligned box overlap (strict)", color=TEXT, fontsize=14, y=1.02)
+    fig.tight_layout()
+    save(fig, "836_overlap.png")
+
+
 def main():
     plot_115()
     plot_940()
@@ -821,6 +864,7 @@ def main():
     plot_3871()
     plot_2265()
     plot_3483()
+    plot_836()
     print("---")
     for p in sorted(OUT.glob("*.png")):
         print(f"{p.stat().st_size:8d}  {p.name}")

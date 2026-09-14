@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>836. Rectangle Overlap · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/rectangle-overlap/">Open on LeetCode ↗</a></p>
+    <h1>836. Rectangle Overlap</h1>
+    <p class="lead"><span class="tag">Axis-aligned box overlap (strict)</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>Positive-area overlap iff both \(x\) and \(y\) projections intersect with <em>strict</em> inequalities. Edge or corner touch has zero area, so return false. For axis-aligned boxes \([x_1,y_1,x_2,y_2]\):</p>
+$$
+\begin{aligned}
+\text{overlap} &\iff x_1^{(1)} &lt; x_2^{(2)} \;\land\; x_1^{(2)} &lt; x_2^{(1)} \\
+&\quad{}\land\; y_1^{(1)} &lt; y_2^{(2)} \;\land\; y_1^{(2)} &lt; y_2^{(1)}.
+\end{aligned}
+$$</div>
+    <h2>Visual</h2>
+    <p>Left: \([0,0,2,2]\) and \([1,1,3,3]\) share a positive-area square. Right: edge-touch \([0,0,1,1]\) vs \([1,0,2,1]\) is not an overlap.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/836_overlap.png" alt="two overlapping axis-aligned rectangles with positive area, and an edge-touch pair that returns false" /></div>
+    <p class="caption">Projections must open-intersect on both axes — closed contact on an edge or corner is false.</p>
+    <h2>Code</h2>
+    <pre><code>from typing import List
+
+
+class Solution:
+    def isRectangleOverlap(self, rec1: List[int], rec2: List[int]) -&gt; bool:
+        return (
+            rec1[0] &lt; rec2[2]
+            and rec2[0] &lt; rec1[2]
+            and rec1[1] &lt; rec2[3]
+            and rec2[1] &lt; rec1[3]
+        )
+</code></pre>
+  </main>
+</body>
+</html>
