@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>2472. Maximum Number of Non-overlapping Palindrome Substrings · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/maximum-number-of-non-overlapping-palindrome-substrings/">Open on LeetCode ↗</a></p>
+    <h1>2472. Maximum Number of Non-overlapping Palindrome Substrings</h1>
+    <p class="lead"><span class="tag">Greedy earliest palindrome of length k or k+1</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>Maximize the <em>count</em> of non-overlapping palindromic substrings of length \(\ge k\). Any longer palindrome contains a palindrome of length \(k\) or \(k+1\), so those two lengths are enough. Scan left→right; at index \(i\) try \([i,i+k)\) then \([i,i+k+1)\); on a hit, take it and jump past its end (earliest-end greedy).</p></div>
+    <h2>Visual</h2>
+    <p>Example \(s=\) <code>abaccdbbd</code>, \(k=3\): take <code>aba</code>, skip past <code>cc</code>, then take <code>dbbd</code> → answer 2.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/2472_greedy.png" alt="string abaccdbbd with aba and dbbd highlighted; insight that only length k or k+1 matter" /></div>
+    <p class="caption">Only hunt length \(k\) and \(k+1\); jump past each pick so the next scan starts after its end.</p>
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def maxPalindromes(self, s: str, k: int) -&gt; int:
+        n = len(s)
+
+        def is_pal(l: int, r: int) -&gt; bool:
+            while l &lt; r:
+                if s[l] != s[r]:
+                    return False
+                l += 1
+                r -= 1
+            return True
+
+        ans = 0
+        i = 0
+        while i &lt;= n - k:
+            if is_pal(i, i + k - 1):
+                ans += 1
+                i += k
+            elif i + k &lt; n and is_pal(i, i + k):
+                ans += 1
+                i += k + 1
+            else:
+                i += 1
+        return ans
+</code></pre>
+  </main>
+</body>
+</html>
