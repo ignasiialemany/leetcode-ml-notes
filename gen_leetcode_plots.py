@@ -851,6 +851,48 @@ def plot_836():
     save(fig, "836_overlap.png")
 
 
+
+
+# ── 1621 sets of k non-overlapping segments (n=4,k=2) ───────────────────────
+def plot_1621():
+    WAYS = [
+        [(1, 2), (2, 3)],
+        [(1, 2), (3, 4)],
+        [(1, 3), (3, 4)],
+        [(1, 2), (2, 4)],
+        [(2, 3), (3, 4)],
+    ]
+    LABELS = ["A", "B", "C", "D", "E"]
+    COLORS = [ACCENT, ACCENT2]
+    fig, axes = plt.subplots(5, 1, figsize=(9.5, 8.2), sharex=True)
+    xs = [1, 2, 3, 4]
+    for ax, segs, lab in zip(axes, WAYS, LABELS):
+        style_ax(ax)
+        ax.plot([0.7, 4.3], [0, 0], color=BORDER, linewidth=1.2, zorder=1)
+        ax.scatter(xs, [0, 0, 0, 0], s=90, c=TEXT, zorder=4, edgecolors=BORDER, linewidths=0.8)
+        for x in xs:
+            ax.text(x, -0.38, str(x), ha="center", va="top", color=MUTED, fontsize=11)
+        for i, (L, R) in enumerate(segs):
+            y = 0.28 + 0.18 * i
+            color = COLORS[i % 2]
+            ax.plot([L, R], [y, y], color=color, linewidth=4.5, solid_capstyle="round", zorder=3)
+            ax.plot([L, L], [0, y], color=color, linewidth=1.4, alpha=0.7, zorder=2)
+            ax.plot([R, R], [0, y], color=color, linewidth=1.4, alpha=0.7, zorder=2)
+            ax.text((L + R) / 2, y + 0.12, f"[{L},{R}]", ha="center", va="bottom", color=color, fontsize=10, fontweight="bold")
+        ax.set_ylim(-0.7, 1.05)
+        ax.set_xlim(0.5, 4.5)
+        ax.set_yticks([])
+        ax.set_xticks([])
+        ax.text(0.55, 0.55, lab, ha="left", va="center", color=WARN, fontsize=13, fontweight="bold",
+                transform=ax.get_yaxis_transform())
+        for spine in ("top", "right", "left", "bottom"):
+            ax.spines[spine].set_visible(False)
+    fig.suptitle("1621 · n=4, k=2 → 5 sets of 2 non-overlapping segments", color=TEXT, fontsize=14, y=0.995)
+    fig.text(0.5, 0.01, r"share endpoints OK · interiors must not overlap · answer = C(n+k-1, 2k) = C(5,4) = 5",
+             ha="center", va="bottom", color=MUTED, fontsize=11)
+    fig.tight_layout(rect=[0.02, 0.04, 1, 0.97])
+    save(fig, "1621_sets.png")
+
 def main():
     plot_115()
     plot_940()
@@ -865,6 +907,7 @@ def main():
     plot_2265()
     plot_3483()
     plot_836()
+    plot_1621()
     print("---")
     for p in sorted(OUT.glob("*.png")):
         print(f"{p.stat().st_size:8d}  {p.name}")

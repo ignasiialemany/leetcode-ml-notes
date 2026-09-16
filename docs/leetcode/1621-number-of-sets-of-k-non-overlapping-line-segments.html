@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>1621. Number of Sets of K Non-Overlapping Line Segments · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/number-of-sets-of-k-non-overlapping-line-segments/">Open on LeetCode ↗</a></p>
+    <h1>1621. Number of Sets of K Non-Overlapping Line Segments</h1>
+    <p class="lead"><span class="tag">Combinatorial map: segments → C(n+k-1, 2k)</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>You have \(n\) points on a line; count ways to draw exactly \(k\) non-overlapping segments of positive length (sharing an endpoint is OK). A stars-and-bars / endpoint transform collapses the DP into one binomial:</p>
+$$
+\mathrm{answer}(n,k)=\binom{n+k-1}{2k}\bmod(10^9+7).
+$$
+<p>Intuition: each segment needs two distinct endpoints; allowing zero-width gaps between segments (shared endpoints) is the usual “bars” slack that bumps \(n\) to \(n+k-1\). Check: \((4,2)\to\binom{5}{4}=5\), \((3,1)\to\binom{3}{2}=3\).</p></div>
+    <h2>Visual</h2>
+    <p>All five sets for \(n=4\), \(k=2\) on points \(1..4\). Blue then green; shared endpoints appear in A, C, D, E.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/1621_sets.png" alt="five rows of four points showing the five ways to place two non-overlapping segments for n=4 k=2" /></div>
+    <p class="caption">Interiors must not overlap; touching at an endpoint is allowed. Closed form \(\binom{n+k-1}{2k}\).</p>
+    <h2>Code</h2>
+    <pre><code>MOD = 10**9 + 7
+
+class Solution:
+    def numberOfSets(self, n: int, k: int) -&gt; int:
+        # C(n+k-1, 2k) mod 10^9+7
+        N, R = n + k - 1, 2 * k
+        if R &gt; N:
+            return 0
+        num = den = 1
+        for i in range(R):
+            num = num * (N - i) % MOD
+            den = den * (i + 1) % MOD
+        return num * pow(den, MOD - 2, MOD) % MOD
+</code></pre>
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>
