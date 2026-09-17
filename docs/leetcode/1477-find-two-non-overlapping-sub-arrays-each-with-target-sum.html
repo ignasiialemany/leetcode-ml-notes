@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>1477. Find Two Non-overlapping Sub-arrays Each With Target Sum · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/find-two-non-overlapping-sub-arrays-each-with-target-sum/">Open on LeetCode ↗</a></p>
+    <h1>1477. Find Two Non-overlapping Sub-arrays Each With Target Sum</h1>
+    <p class="lead"><span class="tag">Sliding window + prefix-min pairing</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>Need two <em>non-overlapping</em> subarrays each summing to \(\textit{target}\), minimize total length. Because \(\textit{arr}[i]\ge 1\), each end \(r\) has at most one start with that sum — a sliding window finds it in \(O(n)\). Keep \(\textit{prefix}[i]=\) min window length ending strictly before \(i\). For a window ending at \(r\) with start \(s\), try \(\textit{best}[r]+\textit{prefix}[s]\). Answer is the min over \(r\), or \(-1\).</p></div>
+    <h2>Visual</h2>
+    <p>Example \(\textit{arr}=[7,3,4,7]\), \(\textit{target}=7\): windows of lengths \(1,2,1\). Best non-overlapping pair is the two ends \(\rightarrow 1+1=2\).</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/1477_prefix_pair.png" alt="array 7,3,4,7 with target windows highlighted; prefix-min pairing steps" /></div>
+    <p class="caption">Positives give a unique window per end; prefix-min turns “best earlier partner” into \(O(1)\).</p>
+    <h2>Sketch</h2>
+    <pre><code># best[r] = len of unique target-sum window ending at r (or ∞)
+# prefix[i] = min best ending in [0, i)
+# ans = min_r best[r] + prefix[start(r)]
+</code></pre>
+    <p class="caption">\(O(n)\) time, \(O(n)\) space.</p>
+  </main>
+</body>
+</html>
