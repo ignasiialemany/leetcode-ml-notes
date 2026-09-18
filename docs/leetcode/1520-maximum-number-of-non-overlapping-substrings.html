@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>1520. Maximum Number of Non-Overlapping Substrings · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/maximum-number-of-non-overlapping-substrings/">Open on LeetCode ↗</a></p>
+    <h1>1520. Maximum Number of Non-Overlapping Substrings</h1>
+    <p class="lead"><span class="tag">Character-closed intervals → greedy earliest-end</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>A valid substring must be <em>closed</em> under characters: if it contains \(c\), it must cover every occurrence of \(c\). So each letter \(c\) suggests an interval \([\textit{first}[c],\textit{last}[c]]\), then expand until no letter inside reaches outside. At most 26 such intervals (keep only representatives that start at their own letter’s first index). They nest or are disjoint — never partially overlap — so classic interval scheduling works: <strong>sort by end, greedily take non-overlapping</strong>. Nesting also makes max count = min total length.</p></div>
+    <h2>Visual</h2>
+    <p>Example \(s=\) <code>adefaddaccc</code>: closed(<code>a</code>) swallows <code>e</code>/<code>f</code> into one chunk; picking the tiny closed pieces <code>e</code>, <code>f</code>, <code>ccc</code> instead gives three substrings.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/1520_closed_intervals.png" alt="string adefaddaccc with closed intervals; greedy picks e, f, ccc" /></div>
+    <p class="caption">Expand each letter’s [first, last] to a closed interval, then earliest-end greedy among ≤26 candidates.</p>
+    <h2>Sketch</h2>
+    <pre><code># first/last per letter → expand to closed intervals (≤26)
+# keep only intervals that start at their letter's first index
+# sort by end; greedily take if start &gt; last_taken_end
+</code></pre>
+    <p class="caption">\(O(n)\) time (26·n expand), \(O(1)\) extra beyond the answer.</p>
+  </main>
+</body>
+</html>
