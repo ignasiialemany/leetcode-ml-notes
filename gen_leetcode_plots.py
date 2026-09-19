@@ -893,6 +893,58 @@ def plot_1621():
     fig.tight_layout(rect=[0.02, 0.04, 1, 0.97])
     save(fig, "1621_sets.png")
 
+
+# ── 1401 circle and rectangle overlapping (clamp to AABB) ───────────────────
+def plot_1401():
+    x1, y1, x2, y2 = 0.0, 0.0, 4.0, 3.0
+    cases = [
+        (-1.5, 1.5, 2.0, "outside edge\nclamp → left side"),
+        (-1.2, -1.0, 1.9, "near corner\nclamp → (0,0)"),
+        (2.0, 1.5, 1.0, "center inside\nclamp → center"),
+    ]
+    fig, axes = plt.subplots(1, 3, figsize=(13.5, 4.8))
+    for ax, (cx, cy, r, title) in zip(axes, cases):
+        nx = min(max(cx, x1), x2)
+        ny = min(max(cy, y1), y2)
+        dx, dy = nx - cx, ny - cy
+        hit = dx * dx + dy * dy <= r * r
+        ax.add_patch(mpatches.Rectangle(
+            (x1, y1), x2 - x1, y2 - y1,
+            facecolor=ACCENT, alpha=0.22, edgecolor=ACCENT, linewidth=2.2, zorder=2,
+        ))
+        circ = plt.Circle((cx, cy), r, facecolor=ACCENT2, alpha=0.18,
+                          edgecolor=ACCENT2, linewidth=2.0, zorder=3)
+        ax.add_patch(circ)
+        ax.scatter([cx], [cy], s=70, c=ACCENT2, zorder=5, edgecolors=TEXT, linewidths=0.8)
+        ax.text(cx, cy + 0.28, "C", ha="center", va="bottom", color=ACCENT2, fontsize=10, fontweight="bold", zorder=6)
+        ax.scatter([nx], [ny], s=80, c=WARN, zorder=6, marker="s", edgecolors=TEXT, linewidths=0.7)
+        ax.plot([cx, nx], [cy, ny], color=WARN, linewidth=1.8, linestyle="--", zorder=4)
+        if abs(nx - cx) < 1e-9 and abs(ny - cy) < 1e-9:
+            ax.text(nx + 0.2, ny + 0.25, "N=C", ha="left", va="bottom", color=WARN, fontsize=9, fontweight="bold")
+        else:
+            ax.text(nx + 0.15, ny + 0.2, "N", ha="left", va="bottom", color=WARN, fontsize=10, fontweight="bold")
+        verdict = "True" if hit else "False"
+        color = ACCENT2 if hit else CRIT
+        ax.text(0.5, -0.08, f"dx²+dy² ≤ r² → {verdict}", transform=ax.transAxes,
+                ha="center", va="top", color=color, fontsize=10, fontweight="bold")
+        style_ax(ax, title)
+        ax.set_aspect("equal")
+        ax.grid(True, alpha=0.12, color=MUTED)
+        pad = 0.7
+        xs = [x1, x2, cx - r, cx + r, nx]
+        ys = [y1, y2, cy - r, cy + r, ny]
+        ax.set_xlim(min(xs) - pad, max(xs) + pad)
+        ax.set_ylim(min(ys) - pad, max(ys) + pad)
+        ax.set_xlabel("x", color=MUTED)
+        ax.set_ylabel("y", color=MUTED)
+    fig.suptitle("1401 · Clamp center into AABB, then radius check", color=TEXT, fontsize=14, y=1.02)
+    fig.text(0.5, 0.01,
+             r"N = (clamp(cx,[x1,x2]), clamp(cy,[y1,y2])) · overlap iff ‖C−N‖² ≤ r²",
+             ha="center", va="bottom", color=MUTED, fontsize=11)
+    fig.tight_layout(rect=[0, 0.05, 1, 0.96])
+    save(fig, "1401_clamp.png")
+
+
 def main():
     plot_115()
     plot_940()
@@ -908,6 +960,7 @@ def main():
     plot_3483()
     plot_836()
     plot_1621()
+    plot_1401()
     print("---")
     for p in sorted(OUT.glob("*.png")):
         print(f"{p.stat().st_size:8d}  {p.name}")

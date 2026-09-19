@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>1401. Circle and Rectangle Overlapping · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/circle-and-rectangle-overlapping/">Open on LeetCode ↗</a></p>
+    <h1>1401. Circle and Rectangle Overlapping</h1>
+    <p class="lead"><span class="tag">Clamp to AABB, then radius check</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>A circle overlaps an axis-aligned rectangle iff the distance from the circle center \(C=(c_x,c_y)\) to the <em>nearest point</em> on the rect is at most \(r\). That nearest point is just the center clamped into the box:</p>
+$$
+\begin{aligned}
+N_x &= \mathrm{clamp}(c_x,[x_1,x_2]) = \min(\max(c_x,x_1),x_2) \\
+N_y &= \mathrm{clamp}(c_y,[y_1,y_2]) = \min(\max(c_y,y_1),y_2) \\
+\text{overlap} &\iff (N_x-c_x)^2 + (N_y-c_y)^2 \le r^2.
+\end{aligned}
+$$
+<p>Three geometries fall out of the same clamp: center outside an edge (\(N\) on that side), near a corner (\(N\) is the corner), or inside (\(N=C\), distance \(0\)).</p></div>
+    <h2>Visual</h2>
+    <p>Shared AABB \([0,0]\times[4,3]\). Dashed segment is \(C\to N\); orange square marks the clamped nearest point.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/1401_clamp.png" alt="three panels: clamp nearest-point for circle vs AABB — center outside edge, near corner, and inside" /></div>
+    <p class="caption">Clamp the center into the rect, then test \(dx^2+dy^2 \le r^2\) — one formula covers edge, corner, and interior.</p>
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def checkOverlap(
+        self,
+        radius: int,
+        xCenter: int,
+        yCenter: int,
+        x1: int,
+        y1: int,
+        x2: int,
+        y2: int,
+    ) -&gt; bool:
+        # Nearest point on the axis-aligned rect to the circle center (clamp).
+        nx = min(max(xCenter, x1), x2)
+        ny = min(max(yCenter, y1), y2)
+        dx = nx - xCenter
+        dy = ny - yCenter
+        return dx * dx + dy * dy &lt;= radius * radius
+</code></pre>
+  </main>
+</body>
+</html>
