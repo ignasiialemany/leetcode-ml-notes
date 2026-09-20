@@ -945,6 +945,76 @@ def plot_1401():
     save(fig, "1401_clamp.png")
 
 
+# ── 3498 reverse degree contributions ───────────────────────────────────────
+def plot_3498():
+    s = "abc"
+    ranks = [26 - (ord(c) - ord("a")) for c in s]
+    positions = [i + 1 for i in range(len(s))]
+    contribs = [r * p for r, p in zip(ranks, positions)]
+    total = sum(contribs)
+
+    fig, ax = plt.subplots(figsize=(9, 5.4))
+    x = np.arange(len(s))
+    colors = [ACCENT, ACCENT2, WARN]
+    bars = ax.bar(x, contribs, color=colors, edgecolor=BORDER, width=0.55, zorder=3)
+    for bar, c, ch, r, p in zip(bars, contribs, s, ranks, positions):
+        ax.text(
+            bar.get_x() + bar.get_width() / 2,
+            c + 3,
+            f"{c}\n{r}×{p}",
+            ha="center",
+            va="bottom",
+            color=TEXT,
+            fontsize=11,
+            fontweight="bold",
+        )
+        ax.text(
+            bar.get_x() + bar.get_width() / 2,
+            -8,
+            f"'{ch}'",
+            ha="center",
+            va="top",
+            color=ACCENT2,
+            fontsize=14,
+            fontweight="bold",
+        )
+    ax.annotate(
+        f"Σ = {' + '.join(str(c) for c in contribs)} = {total}",
+        xy=(0.5, 0.92),
+        xycoords="axes fraction",
+        ha="center",
+        va="top",
+        color=ACCENT2,
+        fontsize=12,
+        fontweight="bold",
+        bbox=dict(boxstyle="round,pad=0.4", facecolor=PANEL, edgecolor=BORDER),
+    )
+    style_ax(ax, f"3498 · Reverse Degree  s=\"{s}\"  → {total}")
+    ax.set_xticks(x)
+    ax.set_xticklabels(
+        [f"pos {p}\nrank {r}" for p, r in zip(positions, ranks)],
+        color=TEXT,
+        fontsize=11,
+    )
+    ax.set_xlabel("1-indexed position · reverse alphabet rank (a→26 … z→1)", color=MUTED)
+    ax.set_ylabel("contribution  rank × position", color=MUTED)
+    ax.set_ylim(-18, max(contribs) * 1.28)
+    ax.axhline(0, color=BORDER, linewidth=1)
+    ax.grid(axis="y", alpha=0.12, color=MUTED, zorder=0)
+    fig.text(
+        0.5,
+        0.01,
+        r"rank(c) = 26 − (c − 'a')   ·   reverseDegree = Σ rank(s[i]) · (i+1)",
+        ha="center",
+        va="bottom",
+        color=MUTED,
+        fontsize=11,
+    )
+    fig.tight_layout(rect=[0, 0.05, 1, 1])
+    save(fig, "3498_rank_pos.png")
+
+
+
 def main():
     plot_115()
     plot_940()
@@ -961,6 +1031,7 @@ def main():
     plot_836()
     plot_1621()
     plot_1401()
+    plot_3498()
     print("---")
     for p in sorted(OUT.glob("*.png")):
         print(f"{p.stat().st_size:8d}  {p.name}")
