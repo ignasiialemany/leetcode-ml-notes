@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>3524. Find X Value of Array I · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/find-x-value-of-array-i/">Open on LeetCode ↗</a></p>
+    <h1>3524. Find X Value of Array I</h1>
+    <p class="lead"><span class="tag">Subarray product mod k (tiny modulus)</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>Keeping any non-empty contiguous piece is exactly “count all subarrays”. With \(n\le 10^5\) you cannot enumerate ends. But \(k\le 5\), so products only matter as remainders in \(\{0,\ldots,k-1\}\).</p>
+<p>Let \(\mathrm{dp}[r]\) = number of subarrays <em>ending at the previous index</em> whose product \(\equiv r\pmod k\). At index \(i\) with \(a=a_i\bmod k\):</p>
+$$
+\begin{aligned}
+\mathrm{ndp}[a] &\mathrel{+}= 1 &&\text{(singleton }[a_i]\text{)},\\
+\mathrm{ndp}[(r\cdot a)\bmod k] &\mathrel{+}= \mathrm{dp}[r] &&\text{for every prior }r.
+\end{aligned}
+$$
+<p>Then add \(\mathrm{ndp}\) into \(\mathrm{result}\) and set \(\mathrm{dp}\leftarrow\mathrm{ndp}\). Total \(O(nk)\).</p></div>
+    <h2>Visual</h2>
+    <p>Walk \(\mathrm{nums}=[1,2,3,4,5]\), \(k=3\). Heatmap = ending remainder counts after each step; right bars = final \(\mathrm{result}=[9,2,4]\).</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/3524_mod_dp.png" alt="Dark-theme plot: ending-remainder DP heatmap for nums=[1,2,3,4,5] k=3 accumulating to result [9,2,4], plus extend-rule diagram" /></div>
+    <p class="caption">Each column is one \(i\); cell \((r,i)\) is how many subarrays ending at \(i\) have product \(\equiv r\). Bottom strip shows the ×extend step before \(a=4\).</p>
+    <h2>Code</h2>
+    <pre><code>from typing import List
+
+class Solution:
+    def resultArray(self, nums: List[int], k: int) -&gt; List[int]:
+        result = [0] * k
+        dp = [0] * k
+        for x in nums:
+            x %= k
+            ndp = [0] * k
+            ndp[x] += 1
+            for r in range(k):
+                if dp[r]:
+                    ndp[(r * x) % k] += dp[r]
+            for r in range(k):
+                result[r] += ndp[r]
+            dp = ndp
+        return result
+</code></pre>
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>
