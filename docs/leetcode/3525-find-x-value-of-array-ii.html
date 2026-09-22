@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>3525. Find X Value of Array II · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/find-x-value-of-array-ii/">Open on LeetCode ↗</a></p>
+    <h1>3525. Find X Value of Array II</h1>
+    <p class="lead"><span class="tag">Segment tree: product + prefix remainder counts (tiny k)</span></p>
+
+    <h2>When</h2>
+    <div class="insight"><p>Point updates + range queries that ask “how many <em>non-empty prefixes</em> of \(\mathrm{nums}[\mathrm{start}:]\) have product \(\equiv x\pmod k\)”, with \(k\le 5\), \(n\le 10^5\), \(q\le 2\cdot 10^4\). Recomputing the running product from \(\mathrm{start}\) each query is too slow; the modulus is tiny, so remainder <em>counts</em> fit in a segment node.</p></div>
+
+    <h2>Move</h2>
+    <div class="insight"><p>Build a segment tree. Each node for a contiguous segment stores:</p>
+$$
+\begin{aligned}
+\mathrm{prod} &= \Bigl(\prod_{\text{seg}} a_i\Bigr) \bmod k,\\
+\mathrm{pref}[0..k-1] &= \text{counts of non-empty prefixes of that segment by product remainder}.
+\end{aligned}
+$$
+<p>Merge \(L\oplus R\): copy \(L.\mathrm{pref}\); for each remainder \(r\) with count \(c\) in \(R.\mathrm{pref}\), add \(c\) into \((L.\mathrm{prod}\cdot r)\bmod k\); set \(\mathrm{prod}\leftarrow (L.\mathrm{prod}\cdot R.\mathrm{prod})\bmod k\). Point-update a leaf and re-merge up. Answer a query by folding \([\mathrm{start},n-1]\) and reading \(\mathrm{pref}[x]\).</p></div>
+
+    <h2>Visual</h2>
+    <p>Example after the first update of sample 1: \(\mathrm{nums}=[1,2,2,4,5]\), \(k=3\), \(x=2\). Running prefix products mod 3; green cells are \(\equiv 2\) (answer \(2\)).</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/3525_prefix_mod.png" alt="Dark-theme plot: running prefix products mod 3 for nums=[1,2,2,4,5], highlighting remainders ≡ 2, plus remainder histogram with pref[2]=2" /></div>
+    <p class="caption">Prefixes of lengths 2 and 5 hit \(\equiv 2\). The histogram is exactly the \(\mathrm{pref}\) vector a root (or range fold) would store.</p>
+
+    <p>Why the merge works: a prefix that ends inside \(R\) is “all of \(L\)” times a relative prefix of \(R\), so every right remainder shifts by \(L.\mathrm{prod}\).</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/3525_merge.png" alt="Dark-theme diagram of merging two segment nodes: left prefs plus right prefs shifted by left.prod" /></div>
+    <p class="caption">\(L=[1,2]\) and \(R=[2,4]\) merge to \([0,3,1]\) — matches the four prefixes of \([1,2,2,4]\).</p>
+
+    <h2>Merge (pseudocode only)</h2>
+    <pre><code>def merge(L, R, k):
+    out_pref = L.pref[:]          # start with left prefixes
+    for r in range(k):
+        c = R.pref[r]
+        if c:
+            out_pref[(L.prod * r) % k] += c
+    return Node(prod=(L.prod * R.prod) % k, pref=out_pref)
+
+# point update leaf → re-merge up
+# query: fold nodes covering [start, n-1] → answer = fold.pref[x]
+</code></pre>
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>
