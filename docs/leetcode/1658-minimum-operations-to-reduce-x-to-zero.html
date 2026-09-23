@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>1658. Minimum Operations to Reduce X to Zero · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/minimum-operations-to-reduce-x-to-zero/">Open on LeetCode ↗</a></p>
+    <h1>1658. Minimum Operations to Reduce X to Zero</h1>
+    <p class="lead"><span class="tag">Sliding window: longest middle sum = total−x (complement of min prefix+suffix)</span></p>
+
+    <h2>Insight</h2>
+    <div class="insight"><p>You may only delete from the <em>left</em> or <em>right</em> end. A sequence of such deletes that sums to \(x\) is exactly a prefix plus a suffix whose values add to \(x\). Flip the picture: the elements you <em>do not</em> delete form one contiguous middle. Minimizing deletions is the same as maximizing that middle’s length, subject to</p>
+$$
+\sum_{\text{middle}} = \mathrm{total} - x.
+$$
+<p>So search for the <em>longest</em> subarray with sum \(\mathrm{total}-x\). Then</p>
+$$
+\mathrm{answer} =
+\begin{cases}
+n &amp; \text{if }\mathrm{total}=x,\\
+n - L &amp; \text{if a middle of length }L\text{ exists},\\
+-1 &amp; \text{otherwise}.
+\end{cases}
+$$
+<p>All \(a_i\ge 1\), so a shrink-only sliding window finds that longest middle in \(O(n)\).</p></div>
+
+    <h2>Visual</h2>
+    <p>Example \(\mathrm{nums}=[1,1,4,2,3]\), \(x=5\): \(\mathrm{total}=11\), target \(=6\). Longest middle is \([1,1,4]\) (len \(3\)) → answer \(5-3=2\) (delete the right end \([2,3]\)).</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/1658_complement.png" alt="Dark-theme bars for [1,1,4,2,3]: green kept middle sum=6, pink removed ends summing to x=5; answer=2" /></div>
+    <p class="caption">Removing only from both ends so values sum to \(x\) ≡ keep the longest contiguous middle with sum \(=\mathrm{total}-x\).</p>
+
+    <p>Sliding window on \(\mathrm{nums}=[3,2,20,1,1,3]\), \(x=10\): target \(=20\). Expand right, shrink left while sum \(&gt;\) target; the only hit is \([20]\) (len \(1\)) → ops \(=6-1=5\).</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/1658_window.png" alt="Dark-theme sliding window on [3,2,20,1,1,3]: longest middle [20] length 1, ops=5; bottom shows window length/sum per right endpoint" /></div>
+    <p class="caption">Green step = current window sum equals the target; dashed line marks best length so far.</p>
+
+    <h2>Code</h2>
+    <pre><code>from typing import List
+
+class Solution:
+    def minOperations(self, nums: List[int], x: int) -&gt; int:
+        total = sum(nums)
+        if total &lt; x:
+            return -1
+        if total == x:
+            return len(nums)
+        target = total - x
+        n = len(nums)
+        best = -1
+        left = 0
+        s = 0
+        for right, v in enumerate(nums):
+            s += v
+            while s &gt; target and left &lt;= right:
+                s -= nums[left]
+                left += 1
+            if s == target:
+                best = max(best, right - left + 1)
+        return -1 if best &lt; 0 else n - best
+</code></pre>
+    <p class="caption">\(O(n)\) time, \(O(1)\) extra space. Positives make the shrink-only window correct for “longest sum \(=\mathrm{target}\)”.</p>
+
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>
