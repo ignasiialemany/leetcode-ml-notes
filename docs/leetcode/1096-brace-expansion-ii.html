@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>1096. Brace Expansion II · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/brace-expansion-ii/">Open on LeetCode ↗</a></p>
+    <h1>1096. Brace Expansion II</h1>
+    <p class="lead"><span class="tag">Recursive descent: brace union vs adjacent cartesian product</span></p>
+
+    <h2>Insight</h2>
+    <div class="insight"><p>The expression is a grammar over <em>sets of strings</em>, not over single strings. Two operators:</p>
+$$
+\begin{aligned}
+R(\{e_1, e_2, \ldots\}) &= R(e_1) \cup R(e_2) \cup \cdots \\
+R(e_1\, e_2) &= \{ab \mid a\in R(e_1),\, b\in R(e_2)\}
+\end{aligned}
+$$
+<p>Comma inside braces is union. Adjacent factors are a cartesian product with concatenation. Recursive descent keeps a current product accumulator (start with \(\{\varepsilon\}\)). On <code>{</code>, recurse; on <code>,</code>, push the current product into the union list and reset; on a letter, product with that singleton; on <code>}</code>, union the parts and return. Sort the final set.</p></div>
+
+    <h2>Visual</h2>
+    <p>Example <code>"{a,b}{c,{d,e}}"</code>: left factor unions to \(\{a,b\}\), right factor unions to \(\{c,d,e\}\), adjacency multiplies them.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/1096_union_product.png" alt="Dark-theme diagram: {a,b} union times {c,{d,e}} union yields ac,ad,ae,bc,bd,be" /></div>
+    <p class="caption">Adjacent factors multiply (×); commas inside <code>{ }</code> take union (∪).</p>
+
+    <p>Example <code>"{{a,z},a{b,c},{ab,z}}"</code>: three top-level union branches; branch 2 is itself a product <code>a × {b,c}</code>. Dedupe across branches, then sort.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/1096_parse_walk.png" alt="Dark-theme recursive descent walk of three union branches producing a, ab, ac, z" /></div>
+    <p class="caption">Top-level braces = union of branches; each branch may still contain products.</p>
+
+    <h2>Code</h2>
+    <pre><code>from typing import List
+
+class Solution:
+    def braceExpansionII(self, expression: str) -&gt; List[str]:
+        def product(left, right):
+            if not left: return set(right)
+            if not right: return set(left)
+            return {a + b for a in left for b in right}
+
+        def parse(i):
+            unions = []
+            cur = {""}
+            n = len(expression)
+            while i &lt; n:
+                c = expression[i]
+                if c == "{":
+                    inner, i = parse(i + 1)
+                    cur = product(cur, inner)
+                elif c == "}":
+                    unions.append(cur)
+                    out = set()
+                    for part in unions:
+                        out |= part
+                    return out, i + 1
+                elif c == ",":
+                    unions.append(cur)
+                    cur = {""}
+                    i += 1
+                else:
+                    cur = product(cur, {c})
+                    i += 1
+            unions.append(cur)
+            out = set()
+            for part in unions:
+                out |= part
+            return out, i
+
+        result, _ = parse(0)
+        return sorted(result)
+</code></pre>
+
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>
