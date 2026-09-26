@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>1807. Evaluate the Bracket Pairs of a String · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/evaluate-the-bracket-pairs-of-a-string/">Open on LeetCode ↗</a></p>
+    <h1>1807. Evaluate the Bracket Pairs of a String</h1>
+    <p class="lead"><span class="tag">Hash map + single scan (keyed substitution)</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>There is no nesting, so the grammar is just literal text interleaved with <code>(key)</code> tokens. Build a hash map from <code>knowledge</code>, then walk <code>s</code> once: on <code>(</code>, take characters until <code>)</code>, append <code>map.get(key, "?")</code>, and continue after the close. Unknown keys become <code>?</code>. Everything else is copied as-is.</p></div>
+    <h2>Scan + replace</h2>
+    <p>Example <code>s="(name)is(age)yearsold"</code> with <code>name→bob</code>, <code>age→two</code>: each parenthesized key is one dictionary lookup; the letters outside brackets never change.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/1807_scan_replace.png" alt="Knowledge map and left-to-right scan replacing (name) and (age)" /></div>
+    <p class="caption">Top: the lookup table. Bottom: each <code>(key)</code> token becomes its value; plain text passes through → <code>bobistwoyearsold</code>.</p>
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def evaluate(self, s: str, knowledge: List[List[str]]) -&gt; str:
+        mp = {k: v for k, v in knowledge}
+        out = []
+        i, n = 0, len(s)
+        while i &lt; n:
+            if s[i] == '(':
+                j = i + 1
+                while s[j] != ')':
+                    j += 1
+                key = s[i + 1 : j]
+                out.append(mp.get(key, '?'))
+                i = j + 1
+            else:
+                out.append(s[i])
+                i += 1
+        return ''.join(out)</code></pre>
+
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>
