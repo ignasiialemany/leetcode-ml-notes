@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>1190. Reverse Substrings Between Each Pair of Parentheses · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/reverse-substrings-between-each-pair-of-parentheses/">Open on LeetCode ↗</a></p>
+    <h1>1190. Reverse Substrings Between Each Pair of Parentheses</h1>
+    <p class="lead"><span class="tag">Stack: reverse on matching close</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>Each matched pair means &ldquo;reverse whatever is currently between these parentheses,&rdquo; starting from the innermost pair. Brackets never appear in the answer. A character stack does this in one left-to-right scan: letters and <code>(</code> push; on <code>)</code>, pop until <code>(</code>, discard the open, and push the popped characters back — popping already reverses them.</p></div>
+    <h2>Innermost first</h2>
+    <p>Example <code>s="(ed(et(oc))el)"</code>: reverse <code>oc</code>, then <code>etco</code>, then the whole interior. The three reverses compose into <code>leetcode</code>.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/1190_nested_reverse.png" alt="Stepwise innermost-first reverses of (ed(et(oc))el) into leetcode" /></div>
+    <p class="caption">Each close applies one reverse to the current interior. Outer pairs see the already-flipped inner material.</p>
+    <h2>Stack on each close</h2>
+    <p>For <code>(u(love)i)</code>: the first <code>)</code> pops <code>love</code> (as <code>e,v,o,l</code>), discards <code>(</code>, and pushes that chunk back. The outer <code>)</code> does the same for <code>uevoli</code> → <code>iloveu</code>.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/1190_stack_close.png" alt="Stack state before and after each closing parenthesis for (u(love)i)" /></div>
+    <p class="caption">Popping into a temporary list reverses; extending the stack writes that reverse in place. No brackets survive.</p>
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def reverseParentheses(self, s: str) -&gt; str:
+        stack = []
+        for c in s:
+            if c == ')':
+                chunk = []
+                while stack and stack[-1] != '(':
+                    chunk.append(stack.pop())
+                stack.pop()  # discard '('
+                stack.extend(chunk)  # already reversed by popping
+            else:
+                stack.append(c)
+        return ''.join(stack)</code></pre>
+
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>
