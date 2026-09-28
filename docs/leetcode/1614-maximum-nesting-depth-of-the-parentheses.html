@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>1614. Maximum Nesting Depth of the Parentheses · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/maximum-nesting-depth-of-the-parentheses/">Open on LeetCode ↗</a></p>
+    <h1>1614. Maximum Nesting Depth of the Parentheses</h1>
+    <p class="lead"><span class="tag">Running paren depth counter</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>You only need the deepest nest level, not the matching contents. Digits and operators are noise. A single counter is enough: <code>(</code> adds one, <code>)</code> subtracts one, and the answer is the highest value the counter ever reaches. A stack would work, but it stores nothing you actually need.</p></div>
+    <h2>Depth timeline</h2>
+    <p>For <code>s="(1+(2*3)+((8)/4))+1"</code>, the digit <code>8</code> sits inside three open parentheses. The running depth peaks at 3 right when that third <code>(</code> opens.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/1614_depth_scan.png" alt="Running parenthesis depth over (1+(2*3)+((8)/4))+1 peaking at 3" /></div>
+    <p class="caption">Blue marks opens, amber marks closes. The curve is the depth after each character; the dashed line is the answer.</p>
+    <h2>Counter rules</h2>
+    <p>Ignore every character that is not a parenthesis. Update on the two that matter, keep a running max.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/1614_counter.png" alt="Three rules: open increments depth, close decrements, answer is max depth" /></div>
+    <p class="caption">Because the string is a valid VPS, the counter never goes negative and ends at zero — you do not need extra validation.</p>
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def maxDepth(self, s: str) -&gt; int:
+        depth = ans = 0
+        for c in s:
+            if c == &quot;(&quot;:
+                depth += 1
+                if depth &gt; ans:
+                    ans = depth
+            elif c == &quot;)&quot;:
+                depth -= 1
+        return ans</code></pre>
+
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>
