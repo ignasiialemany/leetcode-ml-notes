@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>1111. Maximum Nesting Depth of Two Valid Parentheses Strings · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/maximum-nesting-depth-of-two-valid-parentheses-strings/">Open on LeetCode ↗</a></p>
+    <h1>1111. Maximum Nesting Depth of Two Valid Parentheses Strings</h1>
+    <p class="lead"><span class="tag">Assign nesting levels by parity (split VPS)</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>You must cut a valid parentheses string into two VPSs and minimize the deeper of the two. The optimal cut is almost free: walk a running depth and send odd levels to one group and even levels to the other. Each open is labeled with <code>depth % 2</code> before you increment; each close is labeled with <code>depth % 2</code> after you decrement. That puts consecutive nesting shells into different buckets, so each bucket’s depth is about \(\lceil D/2 \rceil\) of the original max depth \(D\).</p></div>
+    <h2>Parity walk</h2>
+    <p>For <code>seq="(()())"</code> the running depth hits 2. Coloring by group parity yields <code>[0,1,1,1,1,0]</code>: the outer pair stays in A, the two inner pairs go to B.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/1111_depth_parity.png" alt="Depth timeline for (()()) with each paren colored by assigned group 0 or 1" /></div>
+    <p class="caption">Blue = group 0, green = group 1. The label under each paren is the group bit written into the answer array.</p>
+    <h2>The two VPSs</h2>
+    <p>After the split, A is <code>()</code> (depth 1) and B is <code>()()</code> (depth 1). The objective <code>max(depth(A), depth(B))</code> is 1 — half of the original depth 2.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/1111_split_groups.png" alt="Side-by-side depth curves for group A () and group B ()()" /></div>
+    <p class="caption">Any valid optimal coloring is accepted; parity of depth is the shortest way to build one.</p>
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def maxDepthAfterSplit(self, seq: str) -&gt; list[int]:
+        ans = []
+        depth = 0
+        for c in seq:
+            if c == &quot;(&quot;:
+                ans.append(depth % 2)
+                depth += 1
+            else:
+                depth -= 1
+                ans.append(depth % 2)
+        return ans</code></pre>
+
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>

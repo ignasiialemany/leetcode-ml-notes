@@ -181,3 +181,12 @@ One problem can sit on two patterns. Put it where the *bottleneck insight* was.
 **Move:** build a dict from the knowledge pairs. Scan once; on `(`, take characters until `)`, append `map.get(key, '?')`, continue after `)`. Plain letters pass through. No nesting ⇒ one pass is enough.
 
 - **1807** Evaluate the Bracket Pairs of a String: each knowledge key unique; unknown keys become `?`; O(n+m).
+
+## Assign nesting levels by parity (split VPS)
+
+**When:** you must partition a valid parentheses string into two VPSs and minimize the max nesting depth of either part.
+
+**Move:** scan with a running depth. Assign each `(` to group `depth % 2` then increment; assign each `)` after decrement to group `depth % 2`. Odd/even nesting levels go to different groups, so each group's depth is about ceil(original_max/2).
+
+- **1111** Maximum Nesting Depth of Two Valid Parentheses Strings: parity of the depth at each paren assigns the group.
+
