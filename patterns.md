@@ -190,3 +190,11 @@ One problem can sit on two patterns. Put it where the *bottleneck insight* was.
 
 - **1111** Maximum Nesting Depth of Two Valid Parentheses Strings: parity of the depth at each paren assigns the group.
 
+## Stack: match closes to opens (LIFO)
+
+**When:** string of brackets (possibly multiple types); validity = every close pairs with the most recent unmatched open of the same type, and nothing is left open.
+
+**Move:** scan left to right. Push opens. On a close, the stack top must be the matching open — pop it — else invalid. End with empty stack.
+
+- **20** Valid Parentheses: close must match stack top (LIFO); leftover opens → false.
+
