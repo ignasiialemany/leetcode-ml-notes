@@ -6,6 +6,16 @@ How to read an entry: **when** (the tell) → **move** (what you do) → **probl
 
 ---
 
+
+## Backtracking: open/close counts (Catalan)
+
+**When:** generate all well-formed parenthesis strings of n pairs (or similar balanced sequences); n is small (Catalan).
+
+**Move:** DFS/backtrack on the growing string. Place `(` only while opens < n. Place `)` only while closes < opens (never go negative / never close more than open). Stop and collect when length == 2n. No need to validate after the fact — the counters prune all invalids.
+
+- **22** Generate Parentheses: open < n and close < open; length 2n leaves are the Catalan set.
+
+
 ## Character-closed intervals → greedy earliest-end
 
 **When:** substrings must include all occurrences of every char they contain; you want the max number of non-overlapping such pieces (min total length on ties).

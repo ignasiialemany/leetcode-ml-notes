@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>22. Generate Parentheses · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/generate-parentheses/">Open on LeetCode ↗</a></p>
+    <h1>22. Generate Parentheses</h1>
+    <p class="lead"><span class="tag">Backtracking: open/close counts (Catalan)</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>You do not generate then filter. Grow the string with two counters: place <code>(</code> only while <code>opens &lt; n</code>, place <code>)</code> only while <code>closes &lt; opens</code>. Every leaf of length \(2n\) is already a valid VPS — the prune rules are exactly the Catalan recurrence.</p></div>
+
+    <h2>Decision tree (n = 2)</h2>
+    <p>From the empty string, every branch that would close more than it has opened is cut immediately (red dashed). The two green leaves are <code>(())</code> and <code>()()</code> — Catalan(2) = 2.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/22_backtrack_tree.png" alt="Backtracking tree for n=2 with illegal closes pruned" /></div>
+    <p class="caption">Rules: <code>opens &lt; n</code> to add <code>(</code>; <code>closes &lt; opens</code> to add <code>)</code>; stop at length \(2n\).</p>
+
+    <h2>Counters along one path</h2>
+    <p>Building <code>(())</code>: the open counter rises to \(n\) first, then closes catch up. The shaded gap is the slack that keeps the prefix valid.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/22_open_close_counters.png" alt="Open and close counters while building (())" /></div>
+    <p class="caption">Same invariants as a running balance scan — just tracked as two integers instead of one.</p>
+
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def generateParenthesis(self, n: int) -&gt; list[str]:
+        ans = []
+
+        def dfs(s: str, opens: int, closes: int) -&gt; None:
+            if len(s) == 2 * n:
+                ans.append(s)
+                return
+            if opens &lt; n:
+                dfs(s + '(', opens + 1, closes)
+            if closes &lt; opens:
+                dfs(s + ')', opens, closes + 1)
+
+        dfs('', 0, 0)
+        return ans</code></pre>
+
+    <h2>Complexity</h2>
+    <p>Output size is the Catalan number \(C_n = \frac{1}{n+1}\binom{2n}{n}\). Time and memory are \(\Theta(C_n \cdot n)\) to emit the strings. For \(n \le 8\), \(C_8 = 1430\) — tiny.</p>
+
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>
