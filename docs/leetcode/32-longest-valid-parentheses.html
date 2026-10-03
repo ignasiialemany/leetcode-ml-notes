@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>32. Longest Valid Parentheses · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/longest-valid-parentheses/">Open on LeetCode ↗</a></p>
+    <h1>32. Longest Valid Parentheses</h1>
+    <p class="lead"><span class="tag">Stack of indices: longest valid paren substring</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>You are not checking whether the whole string is valid — you want the longest <em>substring</em> that is. Keep a stack of <strong>indices</strong>, seeded with sentinel <code>-1</code>. Push on <code>(</code>. On <code>)</code>: pop; if the stack empties, this close is unmatched — push <code>i</code> as the new base. Otherwise the candidate length is <code>i - stack[-1]</code> (distance to the new top). Track the max.</p></div>
+
+    <h2>Walk on <code>)()())</code></h2>
+    <p>Index 0 is an unmatched close (new base). The run from 1..4 is <code>()()</code> — length 4. The final <code>)</code> resets the base again.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/32_stack_walk.png" alt="Stack-of-indices walk on )()()) with actions and best" /></div>
+    <p class="caption">After each successful pop, length = current index minus the new stack top.</p>
+
+    <h2>Why the sentinel −1?</h2>
+    <p>The sentinel is the imaginary index before the current candidate. When a match leaves only <code>-1</code> (or an unmatched open) on the stack, subtraction gives the full span. An unmatched <code>)</code> that empties the stack becomes the next sentinel.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/32_sentinel_base.png" alt="Sentinel -1 and unmatched close resetting the base" /></div>
+    <p class="caption">Same idea as a LIFO match, but the values on the stack are positions so you can measure length.</p>
+
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def longestValidParentheses(self, s: str) -&gt; int:
+        stack = [-1]
+        best = 0
+        for i, c in enumerate(s):
+            if c == '(':
+                stack.append(i)
+            else:
+                stack.pop()
+                if not stack:
+                    stack.append(i)
+                else:
+                    best = max(best, i - stack[-1])
+        return best</code></pre>
+
+    <h2>Complexity</h2>
+    <p>One pass: \(O(n)\) time, \(O(n)\) stack in the worst case (all opens).</p>
+
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>
