@@ -1014,6 +1014,202 @@ def plot_3498():
     save(fig, "3498_rank_pos.png")
 
 
+# ── 678 valid parenthesis string: [lo, hi] band ─────────────────────────────
+def _678_intervals(s):
+    """Return per-prefix (lo_raw, lo, hi) with lo clamped at 0; stops if hi < 0."""
+    lo = hi = 0
+    rows = [(0, 0, 0)]
+    for c in s:
+        if c == "(":
+            lo += 1; hi += 1
+        elif c == ")":
+            lo -= 1; hi -= 1
+        else:
+            lo -= 1; hi += 1
+        raw = lo
+        if hi < 0:
+            rows.append((raw, lo, hi))
+            break
+        lo = max(lo, 0)
+        rows.append((raw, lo, hi))
+    return rows
+
+
+def _678_reachable(s):
+    """reachable[i][b]: some star reading of s[:i] keeps every prefix >= 0 and ends at b."""
+    n = len(s)
+    R = np.zeros((n + 1, n + 1), dtype=bool)
+    R[0, 0] = True
+    for i, c in enumerate(s):
+        for b in np.nonzero(R[i])[0]:
+            moves = {"(": [1], ")": [-1], "*": [1, -1, 0]}[c]
+            for d in moves:
+                nb = b + d
+                if 0 <= nb <= n:
+                    R[i + 1, nb] = True
+    return R
+
+
+def _678_paths(s):
+    """All concrete star readings whose prefixes never dip below 0 (balance sequences)."""
+    out = []
+    stars = [i for i, c in enumerate(s) if c == "*"]
+    import itertools
+    for choice in itertools.product([1, -1, 0], repeat=len(stars)):
+        pick = dict(zip(stars, choice))
+        b, seq, ok = 0, [0], True
+        for i, c in enumerate(s):
+            b += 1 if c == "(" else -1 if c == ")" else pick[i]
+            if b < 0:
+                ok = False
+                break
+            seq.append(b)
+        if ok:
+            out.append(seq)
+    return out
+
+
+def plot_678_band():
+    s = "(*()*)**"
+    n = len(s)
+    rows = _678_intervals(s)
+    raw = np.array([r[0] for r in rows]); lo = np.array([r[1] for r in rows]); hi = np.array([r[2] for r in rows])
+    x = np.arange(n + 1)
+    paths = _678_paths(s)
+    valid = [p for p in paths if p[-1] == 0]
+    rng = np.random.default_rng(3)
+
+    fig, ax = plt.subplots(figsize=(11, 5.6))
+    ax.fill_between(x, lo, hi, color=ACCENT, alpha=0.18, step=None, zorder=1, label="reachable band [lo, hi]")
+    # thin sample concrete readings (never dip below 0)
+    sample = [paths[k] for k in rng.choice(len(paths), size=min(14, len(paths)), replace=False)]
+    for p in sample:
+        jit = rng.uniform(-0.06, 0.06)
+        ax.plot(x, np.array(p) + jit, color=MUTED, alpha=0.35, linewidth=0.9, zorder=2)
+    # one fully valid reading
+    hero = valid[len(valid) // 2]
+    ax.plot(x, hero, color=ACCENT2, linewidth=2.2, marker="o", markersize=4, zorder=4,
+            label="one valid reading (ends at 0)")
+    ax.plot(x, hi, color=ACCENT, linewidth=2.4, zorder=5, label="hi (every * as '(')")
+    ax.plot(x, lo, color=WARN, linewidth=2.4, zorder=5, label="lo (clamped at 0)")
+    # unclamped lo dips
+    for i in range(1, n + 1):
+        if raw[i] < 0:
+            ax.plot([i - 1, i], [lo[i - 1], raw[i]], color=CRIT, linestyle="--", linewidth=1.4, zorder=3)
+            ax.scatter([i], [raw[i]], color=CRIT, s=36, zorder=6)
+            ax.annotate("", xy=(i, 0), xytext=(i, raw[i]),
+                        arrowprops=dict(arrowstyle="->", color=CRIT, lw=1.4), zorder=6)
+    ax.scatter([], [], color=CRIT, s=36, label="lo−1 < 0 → dead path, clamp to 0")
+    ax.axhline(0, color=BORDER, linewidth=1.2, zorder=0)
+    ax.axhspan(-1.6, 0, color=CRIT, alpha=0.06, zorder=0)
+    ax.text(0.15, -1.25, "balance < 0 = more ')' than '(' so far → never recoverable",
+            color=CRIT, fontsize=9, alpha=0.9)
+    # end check
+    ax.scatter([n], [lo[-1]], s=220, facecolor="none", edgecolor=ACCENT2, linewidth=2.4, zorder=7)
+    ax.text(n + 0.3, 0.0, "end check:\nlo == 0 → some reading\nends balanced → valid", color=ACCENT2, fontsize=10.5,
+            va="center", ha="left")
+    for i in range(n + 1):
+        ax.text(i, hi[i] + 0.25, f"[{lo[i]},{hi[i]}]", ha="center", color=TEXT, fontsize=8.5)
+    style_ax(ax, f"678 · reachable open-count band on s = \"{s}\"  ({len(paths)} live readings, {len(valid)} valid)")
+    ax.set_xticks(x)
+    ax.set_xticklabels(["start"] + [f"{i+1}\n{c}" for i, c in enumerate(s)], color=TEXT, fontsize=11)
+    ax.set_xlabel("prefix length i  ·  character consumed", color=MUTED)
+    ax.set_ylabel("balance  (#open − #close)", color=MUTED)
+    ax.set_ylim(-1.6, hi.max() + 1.2)
+    ax.set_xlim(-0.4, n + 2.0)
+    ax.grid(alpha=0.10, color=MUTED)
+    ax.legend(facecolor=PANEL, edgecolor=BORDER, labelcolor=TEXT, fontsize=8.5, loc="upper left")
+    fig.text(0.5, 0.005, "'(' : lo+1, hi+1     ')' : lo−1, hi−1     '*' : lo−1, hi+1     then  lo = max(lo, 0);  fail if hi < 0",
+             ha="center", va="bottom", color=MUTED, fontsize=10.5)
+    fig.tight_layout(rect=[0, 0.04, 1, 1])
+    save(fig, "678_band.png")
+
+
+def plot_678_dp_vs_interval():
+    s = "(*()*)**"
+    n = len(s)
+    R = _678_reachable(s)
+    rows = _678_intervals(s)
+    lo = np.array([r[1] for r in rows]); hi = np.array([r[2] for r in rows])
+    cmap = LinearSegmentedColormap.from_list("reach", [PANEL, "#2f4f99"])
+    fig, ax = plt.subplots(figsize=(10.5, 5.8))
+    ax.imshow(R.T.astype(float), origin="lower", cmap=cmap, aspect="auto",
+              extent=[-0.5, n + 0.5, -0.5, n + 0.5], vmin=0, vmax=1, zorder=1)
+    for i in range(n + 2):
+        ax.axvline(i - 0.5, color=BG, linewidth=1.2, zorder=2)
+    for b in range(n + 2):
+        ax.axhline(b - 0.5, color=BG, linewidth=1.2, zorder=2)
+    for i in range(n + 1):
+        for b in range(n + 1):
+            if R[i, b]:
+                ax.text(i, b, "✓", ha="center", va="center", color=TEXT, fontsize=11, fontweight="bold", zorder=3)
+        ax.add_patch(mpatches.Rectangle((i - 0.42, lo[i] - 0.42), 0.84, hi[i] - lo[i] + 0.84,
+                                        fill=False, edgecolor=WARN, linewidth=1.8, zorder=4))
+        ax.text(i, hi[i] + 0.62, f"hi={hi[i]}", ha="center", va="center", color=ACCENT2, fontsize=9, zorder=5)
+        ax.text(i, lo[i] - 0.62 if lo[i] > 0 else -0.85, f"lo={lo[i]}", ha="center", va="center", color=WARN, fontsize=9, zorder=5)
+    ax.scatter([n], [0], s=420, facecolor="none", edgecolor=ACCENT2, linewidth=2.6, zorder=6)
+    ax.annotate("answer = reachable[n][0]\n⇔ lo == 0", xy=(n + 0.3, 0), xytext=(n + 0.75, 1.6), color=ACCENT2,
+                fontsize=10, ha="left", arrowprops=dict(arrowstyle="->", color=ACCENT2, lw=1.3), zorder=6)
+    style_ax(ax, f"678 · O(n²) table reachable[i][b] vs two numbers [lo, hi]   s = \"{s}\"")
+    ax.set_xticks(range(n + 1))
+    ax.set_xticklabels(["start"] + [f"{i+1}\n{c}" for i, c in enumerate(s)], color=TEXT, fontsize=11)
+    ax.set_yticks(range(n + 1))
+    ax.set_xlabel("prefix length i", color=MUTED)
+    ax.set_ylabel("balance b", color=MUTED)
+    ax.set_xlim(-0.5, n + 3.2); ax.set_ylim(-1.2, hi.max() + 1.8)
+    ax.set_yticks(range(int(hi.max()) + 2))
+    handles = [mpatches.Patch(facecolor="#2f4f99", edgecolor=BORDER, label="reachable cell (✓)"),
+               mpatches.Patch(facecolor="none", edgecolor=WARN, label="[lo, hi] box per column")]
+    ax.legend(handles=handles, facecolor=PANEL, edgecolor=BORDER, labelcolor=TEXT, fontsize=9, loc="upper left")
+    fig.text(0.5, 0.005, "every column's ✓ cells are one gap-free run → store only its endpoints: O(n·n) bits → 2 integers",
+             ha="center", va="bottom", color=MUTED, fontsize=10.5)
+    fig.tight_layout(rect=[0, 0.04, 1, 1])
+    save(fig, "678_dp_vs_interval.png")
+
+
+def plot_678_fail():
+    cases = [("(*)))", "hi < 0 → return False", "upper right"), ("((*", "end lo = 1 > 0 → False", "lower right")]
+    fig, axes = plt.subplots(1, 2, figsize=(11.5, 4.6))
+    for ax, (s, verdict, legloc) in zip(axes, cases):
+        n = len(s)
+        rows = _678_intervals(s)
+        m = len(rows)
+        lo = np.array([r[1] for r in rows]); hi = np.array([r[2] for r in rows])
+        x = np.arange(m)
+        ok = hi >= 0
+        xs = x[ok]
+        ax.fill_between(xs, lo[ok], hi[ok], color=ACCENT, alpha=0.18, zorder=1)
+        ax.plot(xs, hi[ok], color=ACCENT, linewidth=2.2, marker="o", markersize=4, label="hi")
+        ax.plot(xs, lo[ok], color=WARN, linewidth=2.2, marker="o", markersize=4, label="lo (clamped)")
+        ax.axhline(0, color=BORDER, linewidth=1.2)
+        ax.axhspan(-1.8, 0, color=CRIT, alpha=0.07, zorder=0)
+        if not ok.all():
+            k = int(np.argmin(ok))
+            ax.plot([k - 1, k], [hi[k - 1], hi[k]], color=CRIT, linewidth=2.2, linestyle="--")
+            ax.scatter([k], [hi[k]], color=CRIT, s=120, marker="X", zorder=6)
+            ax.annotate("hi = −1: even all * as '('\ncannot cover this ')'", xy=(k, hi[k]), xytext=(k - 3.0, -1.55),
+                        color=CRIT, fontsize=10, arrowprops=dict(arrowstyle="->", color=CRIT, lw=1.3))
+        else:
+            ax.scatter([n], [lo[-1]], s=220, facecolor="none", edgecolor=CRIT, linewidth=2.4, zorder=6)
+            ax.annotate("lo = 1: even all * as ')'\nleaves an open unmatched", xy=(n, lo[-1]), xytext=(0.0, 3.4),
+                        color=CRIT, fontsize=10, arrowprops=dict(arrowstyle="->", color=CRIT, lw=1.3))
+        for i in range(m):
+            ax.text(i, max(hi[i], -1) + 0.3 if hi[i] >= 0 else hi[i] - 0.45, f"[{lo[i]},{hi[i]}]",
+                    ha="center", color=TEXT, fontsize=8.5)
+        style_ax(ax, f"s = \"{s}\"  ·  {verdict}")
+        ax.set_xticks(range(n + 1))
+        ax.set_xticklabels(["start"] + [f"{i+1}\n{c}" for i, c in enumerate(s)], color=TEXT, fontsize=11)
+        ax.set_ylim(-1.8, max(hi.max(), 2) + 1.6)
+        ax.set_xlim(-0.4, n + 0.4)
+        ax.set_xlabel("prefix length i", color=MUTED)
+        ax.set_ylabel("balance", color=MUTED)
+        ax.grid(alpha=0.10, color=MUTED)
+        ax.legend(facecolor=PANEL, edgecolor=BORDER, labelcolor=TEXT, fontsize=8.5, loc=legloc)
+    fig.suptitle("678 · the two ways to fail", color=TEXT, fontsize=13)
+    fig.tight_layout()
+    save(fig, "678_fail.png")
+
+
 
 def main():
     plot_115()
@@ -1032,6 +1228,9 @@ def main():
     plot_1621()
     plot_1401()
     plot_3498()
+    plot_678_band()
+    plot_678_dp_vs_interval()
+    plot_678_fail()
     print("---")
     for p in sorted(OUT.glob("*.png")):
         print(f"{p.stat().st_size:8d}  {p.name}")

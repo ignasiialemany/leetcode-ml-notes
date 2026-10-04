@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>678. Valid Parenthesis String · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/valid-parenthesis-string/">Open on LeetCode ↗</a></p>
+    <h1>678. Valid Parenthesis String</h1>
+    <p class="lead"><span class="tag">Greedy interval of possible open counts [lo, hi]</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>Each <code>*</code> can be <code>(</code>, <code>)</code> or empty, so there are up to \(3^k\) readings — but you never need to know <em>which</em> reading. Track only the set of balances (open − close) that some reading can be at after each prefix, ignoring any reading that ever went negative. That set is always a <strong>contiguous interval</strong> \([lo, hi]\). <code>(</code> shifts it up, <code>)</code> shifts it down, <code>*</code> widens it by one on each side. Clamp \(lo\) at 0 (negative balances are dead paths), fail the moment \(hi &lt; 0\), and accept iff \(lo = 0\) at the end.</p></div>
+
+    <h2>The band on <code>(*()*)**</code></h2>
+    <p>The blue line is "every star is <code>(</code>" (the most opens you could have), the orange line is "every star is <code>)</code> unless that would go negative" (the fewest). Thin grey lines are concrete star readings that stay \(\ge 0\) — every one of them lives inside the band, and every integer in the band is hit by some reading. Red dashes are where \(lo - 1\) would dip below zero: that reading has more <code>)</code> than <code>(</code> so far and can never recover, so we just drop it and clamp.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/678_band.png" alt="Reachable balance band [lo, hi] over prefixes of (*()*)** with sample star readings, clamp at 0 and end check" /></div>
+    <p class="caption">Update rules: $$\texttt{(}:\ [lo,hi]\to[lo+1,\,hi+1]\qquad \texttt{)}:\ [lo-1,\,hi-1]\qquad \texttt{*}:\ [lo-1,\,hi+1]$$ then \(lo \leftarrow \max(lo, 0)\). End: valid \(\iff 0 \in [lo, hi] \iff lo = 0\).</p>
+
+    <h2>Why two numbers are enough: the DP table collapses</h2>
+    <p>The honest DP is a boolean table \(\text{reach}[i][b]\) = "some reading of the first \(i\) characters stays \(\ge 0\) and ends at balance \(b\)":</p>
+    $$\text{reach}[i+1][b] = \begin{cases} \text{reach}[i][b-1] & s_i = \texttt{(}\\ \text{reach}[i][b+1] & s_i = \texttt{)}\\ \text{reach}[i][b-1] \lor \text{reach}[i][b] \lor \text{reach}[i][b+1] & s_i = \texttt{*}\end{cases}\qquad b \ge 0$$
+    <p>That is \(O(n^2)\) cells. But look at any column: the ✓ cells form one gap-free run. Shifting a run keeps it a run; widening by ±1 (and taking the union with itself) keeps it a run; cutting off \(b &lt; 0\) keeps it a run. By induction every column is exactly \([lo, hi]\), so the table is fully described by its two endpoints — \(O(1)\) state.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/678_dp_vs_interval.png" alt="Heatmap of reach[i][b] for (*()*)** with the [lo, hi] box per column" /></div>
+    <p class="caption">The orange box per column is \([lo, hi]\); it covers exactly the reachable cells. Answer \(=\text{reach}[n][0]\), i.e. \(lo = 0\).</p>
+
+    <h2>The two ways to fail</h2>
+    <p><strong>\(hi &lt; 0\) mid-scan:</strong> even reading every star as <code>(</code> there are more closes than opens — no later character can fix a prefix, so return immediately. <strong>\(lo &gt; 0\) at the end:</strong> even reading every star as <code>)</code> some open is left unmatched.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/678_fail.png" alt="Failing examples: (*))) where hi drops below 0, and ((* where lo ends at 1" /></div>
+    <p class="caption">Left: <code>(*)))</code> — the fifth character pushes \(hi\) to −1. Right: <code>((*</code> — the band ends at \([1, 3]\), not touching 0.</p>
+
+    <h2>Alternative: two passes</h2>
+    <p>Same bounds, split up. Left→right, treat every <code>*</code> as <code>(</code>: if the balance ever goes negative, too many closes (\(hi &lt; 0\)). Right→left, treat every <code>*</code> as <code>)</code> and count closes vs opens: if it ever goes negative, too many opens (the mirror of \(lo &gt; 0\)). Pass both → valid. Also \(O(n)\) / \(O(1)\), but the one-pass interval makes the "set of reachable balances" picture explicit.</p>
+
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def checkValidString(self, s: str) -&gt; bool:
+        lo = hi = 0
+        for c in s:
+            if c == '(':
+                lo += 1; hi += 1
+            elif c == ')':
+                lo -= 1; hi -= 1
+            else:
+                lo -= 1; hi += 1
+            if hi &lt; 0:
+                return False
+            lo = max(lo, 0)
+        return lo == 0</code></pre>
+
+    <h2>Complexity</h2>
+    <p>One pass with two integers: \(O(n)\) time, \(O(1)\) space — versus \(O(n^2)\) time/space for the \(\text{reach}[i][b]\) table and \(O(3^k)\) for brute-forcing the stars.</p>
+
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>

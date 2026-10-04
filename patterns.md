@@ -7,6 +7,15 @@ How to read an entry: **when** (the tell) → **move** (what you do) → **probl
 ---
 
 
+## Greedy interval of possible open counts [lo, hi]
+
+**When:** parentheses validity with wildcards (`*` = `(`, `)` or empty) — too many readings to enumerate, but you only need "does *some* reading work?".
+
+**Move:** track the interval of reachable balances. `(`: lo+1, hi+1. `)`: lo−1, hi−1. `*`: lo−1, hi+1. If hi < 0 → false (even all-stars-as-`(` can't cover). Clamp lo = max(lo, 0) (negative balances are dead paths). Valid iff lo == 0 at the end. This is the O(n²) reach[i][balance] DP collapsed: each column is one contiguous run. Alt: two passes (L→R stars as `(`, R→L stars as `)`).
+
+- **678** Valid Parenthesis String: reachable balances form [lo, hi]; fail on hi < 0, clamp lo at 0, answer lo == 0. O(n)/O(1).
+
+
 ## Backtracking: open/close counts (Catalan)
 
 **When:** generate all well-formed parenthesis strings of n pairs (or similar balanced sequences); n is small (Catalan).
