@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>856. Score of Parentheses · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/score-of-parentheses/">Open on LeetCode ↗</a></p>
+    <h1>856. Score of Parentheses</h1>
+    <p class="lead"><span class="tag">Depth counting: innermost () at depth d adds 2^d</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>The rules are \(\texttt{()} = 1\), \(AB = A + B\), \((A) = 2A\). Concatenation is plain addition and wrapping is multiplication by 2 — and multiplication distributes over addition: \(2(A+B) = 2A + 2B\). So push every "×2" all the way down until it hits an atom. The only atoms are the innermost <code>()</code> pairs, and each one gets doubled once per pair that encloses it, i.e. once per level of depth. No tree, no stack needed:</p>
+    $$\text{score}(s) \;=\; \sum_{\text{innermost } \texttt{()}} 2^{\,\text{depth}}$$
+    <p>where depth = number of pairs strictly enclosing that <code>()</code>. An innermost pair is spotted locally: a <code>)</code> whose previous character is <code>(</code>. Outer pairs never score on their own — they only lift what's inside one level deeper.</p></div>
+
+    <h2>Read the score off the depth profile</h2>
+    <p>Walk <code>(()(()))()</code> keeping a depth counter. Every peak of the profile that is a single <code>()</code> is a scoring atom; its contribution is \(2^d\) where \(d\) is the depth <em>after</em> its <code>)</code> (the level the peak sits on). The slopes in between contribute nothing.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/856_depth.png" alt="Depth profile of (()(()))() with the three innermost () peaks labelled 2^1, 2^2, 2^0, total 7" /></div>
+    <p class="caption">Check by the rules: \(\texttt{(()(()))} = 2\,(1 + 2\cdot 1) = 6\), plus the trailing \(\texttt{()} = 1\), total 7 — exactly \(2^1 + 2^2 + 2^0\).</p>
+
+    <h2>Same thing as a stack (the "honest" recursion)</h2>
+    <p>If you don't trust the distributivity trick, evaluate the grammar directly. Keep one frame per open group holding the score of what's been closed inside it so far. <code>(</code> opens a group: push 0. <code>)</code> closes it: pop its inner score \(v\); the group is worth \(1\) if empty, else \(2v\), and that is added to the enclosing frame:</p>
+    $$\texttt{(}:\ \text{push } 0 \qquad \texttt{)}:\ v \leftarrow \text{pop}(),\ \ \text{top} \mathrel{+}= \max(2v,\,1)$$
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/856_stack.png" alt="Stack frames evolving over (()(()))(): push 0 on open, pop and add max(2v,1) on close, final stack[0] = 7" /></div>
+    <p class="caption">Green closes are innermost <code>()</code> (\(+1\)); orange closes wrap a non-empty group (\(\times 2\)). Each \(+1\) gets doubled once by every orange close above it — that's the \(2^{d}\) in the depth formula. The stack depth at any moment equals the depth counter, which is why the counter alone suffices.</p>
+
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def scoreOfParentheses(self, s: str) -&gt; int:
+        # Each innermost "()" at depth d contributes 2**d.
+        ans = depth = 0
+        for i, c in enumerate(s):
+            if c == '(':
+                depth += 1
+            else:
+                depth -= 1
+                if s[i - 1] == '(':
+                    ans += 1 &lt;&lt; depth
+        return ans</code></pre>
+
+    <h2>Complexity</h2>
+    <p>One pass, one counter: \(O(n)\) time, \(O(1)\) space. The stack version is \(O(n)\) time, \(O(n)\) space; naive recursive splitting into balanced chunks is \(O(n^2)\) worst case.</p>
+
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>

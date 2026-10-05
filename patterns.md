@@ -7,6 +7,15 @@ How to read an entry: **when** (the tell) → **move** (what you do) → **probl
 ---
 
 
+## Depth counting: innermost () at depth d adds 2^d
+
+**When:** a score/value defined recursively on a balanced paren string where concatenation adds and wrapping multiplies (`()`=1, `AB`=A+B, `(A)`=2A).
+
+**Move:** distribute the ×2 down to the atoms: only innermost `()` pairs score, each worth 2^depth (depth = enclosing pairs). Scan with a depth counter; on `)` with previous char `(` (after decrementing depth) add `1 << depth`. Stack equivalent: push 0 on `(`; on `)` pop v and add max(2v, 1) to the new top.
+
+- **856** Score of Parentheses: innermost `()` at depth d contributes 2^d; sum them. O(n)/O(1).
+
+
 ## Greedy interval of possible open counts [lo, hi]
 
 **When:** parentheses validity with wildcards (`*` = `(`, `)` or empty) — too many readings to enumerate, but you only need "does *some* reading work?".

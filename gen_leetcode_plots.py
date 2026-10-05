@@ -1211,6 +1211,108 @@ def plot_678_fail():
 
 
 
+# ── 856 Score of Parentheses ───────────────────────────────────────────────
+def _856_depths(s):
+    """depth after each prefix (len n+1) and innermost '()' pairs (open_idx, depth_of_pair)."""
+    d = [0]
+    pairs = []
+    for i, c in enumerate(s):
+        d.append(d[-1] + (1 if c == "(" else -1))
+        if c == ")" and s[i - 1] == "(":
+            pairs.append((i - 1, d[-1]))
+    return d, pairs
+
+
+def plot_856_depth():
+    s = "(()(()))()"
+    n = len(s)
+    d, pairs = _856_depths(s)
+    x = np.arange(n + 1)
+    fig, ax = plt.subplots(figsize=(11, 5.4))
+    ax.fill_between(x, 0, d, color=ACCENT, alpha=0.12, zorder=1)
+    ax.plot(x, d, color=ACCENT, linewidth=2.4, marker="o", markersize=5, zorder=3, label="depth after prefix")
+    total = 0
+    colors = [ACCENT2, WARN, CRIT]
+    for k, (i, dep) in enumerate(pairs):
+        val = 1 << dep
+        total += val
+        col = colors[min(dep, 2)]
+        # the '()' peak spans prefix i -> i+1 -> i+2 ; peak at x=i+1, height dep+1
+        ax.add_patch(mpatches.FancyBboxPatch((i + 0.55, dep - 0.15), 0.9, 1.3,
+                                             boxstyle="round,pad=0.02,rounding_size=0.15",
+                                             facecolor=col, alpha=0.18, edgecolor=col, linewidth=1.6, zorder=2))
+        ax.scatter([i + 1], [dep + 1], s=170, color=col, zorder=5, edgecolor=BG, linewidth=1.5)
+        ax.text(i + 1, dep + 1.45, f"2^{dep} = {val}", ha="center", color=col, fontsize=12, fontweight="bold")
+        ax.text(i + 1, dep - 0.42, f"depth {dep}", ha="center", color=MUTED, fontsize=8.5)
+    style_ax(ax, f"856 · depth profile of s = \"{s}\" — only innermost \"()\" peaks score")
+    ax.set_xticks(x)
+    ax.set_xticklabels(["start"] + [f"{i+1}\n{c}" for i, c in enumerate(s)], color=TEXT, fontsize=11)
+    ax.set_xlabel("prefix length · character consumed", color=MUTED)
+    ax.set_ylabel("nesting depth  (#open − #close)", color=MUTED)
+    ax.set_ylim(-0.8, max(d) + 2.2)
+    ax.set_xlim(-0.5, n + 0.5)
+    ax.set_yticks(range(max(d) + 1))
+    ax.grid(alpha=0.10, color=MUTED)
+    terms = " + ".join(f"2^{dep}" for _, dep in pairs)
+    vals = " + ".join(str(1 << dep) for _, dep in pairs)
+    ax.text(0.99, 0.97, f"score = {terms} = {vals} = {total}", transform=ax.transAxes, ha="right", va="top",
+            color=TEXT, fontsize=12, bbox=dict(facecolor=PANEL, edgecolor=BORDER, boxstyle="round,pad=0.4"))
+    fig.text(0.5, 0.005, "an outer pair never scores by itself — it only doubles what's inside, i.e. lifts each inner \"()\" one level deeper",
+             ha="center", va="bottom", color=MUTED, fontsize=10.5)
+    fig.tight_layout(rect=[0, 0.04, 1, 1])
+    save(fig, "856_depth.png")
+
+
+def plot_856_stack():
+    s = "(()(()))()"
+    n = len(s)
+    # simulate stack formulation: start [0]; '(' push 0; ')' pop v, top += max(2v, 1)
+    st = [0]
+    snaps = [list(st)]
+    notes = ["init"]
+    for c in s:
+        if c == "(":
+            st.append(0)
+            notes.append("push 0")
+        else:
+            v = st.pop()
+            add = max(2 * v, 1)
+            st[-1] += add
+            notes.append(f"pop {v}\n+{add}" + (" (=1)" if v == 0 else f" (=2·{v})"))
+        snaps.append(list(st))
+    hmax = max(len(t) for t in snaps)
+    fig, ax = plt.subplots(figsize=(12, 5.8))
+    for j, t in enumerate(snaps):
+        for lvl, v in enumerate(t):
+            top = lvl == len(t) - 1
+            fc = "#2f4f99" if not top else ACCENT
+            ax.add_patch(mpatches.FancyBboxPatch((j - 0.38, lvl + 0.08), 0.76, 0.84,
+                                                 boxstyle="round,pad=0.01,rounding_size=0.08",
+                                                 facecolor=fc, alpha=0.85 if top else 0.55,
+                                                 edgecolor=BORDER, linewidth=1.0, zorder=2))
+            ax.text(j, lvl + 0.5, str(v), ha="center", va="center", color=BG if top else TEXT,
+                    fontsize=12, fontweight="bold", zorder=3)
+        col = ACCENT2 if notes[j].startswith("pop 0") else (WARN if notes[j].startswith("pop") else MUTED)
+        ax.text(j, -0.25, notes[j], ha="center", va="top", color=col, fontsize=8.5)
+    ax.scatter([n], [0.5], s=1400, facecolor="none", edgecolor=ACCENT2, linewidth=2.4, zorder=4)
+    ax.annotate(f"answer = stack[0] = {snaps[-1][0]}", xy=(n + 0.45, 0.5), xytext=(n - 2.6, hmax + 0.35),
+                color=ACCENT2, fontsize=11, arrowprops=dict(arrowstyle="->", color=ACCENT2, lw=1.3))
+    style_ax(ax, f"856 · stack formulation on s = \"{s}\" — each frame = score of the group currently open")
+    ax.set_xticks(range(n + 1))
+    ax.set_xticklabels(["start"] + [f"{i+1}\n{c}" for i, c in enumerate(s)], color=TEXT, fontsize=11)
+    ax.set_xlim(-0.6, n + 0.9)
+    ax.set_ylim(-1.5, hmax + 0.9)
+    ax.set_yticks([])
+    ax.set_xlabel("after consuming character", color=MUTED)
+    handles = [mpatches.Patch(facecolor=ACCENT, edgecolor=BORDER, label="top frame (group being built)"),
+               mpatches.Patch(facecolor="#2f4f99", alpha=0.55, edgecolor=BORDER, label="enclosing frames")]
+    ax.legend(handles=handles, facecolor=PANEL, edgecolor=BORDER, labelcolor=TEXT, fontsize=9, loc="upper left")
+    fig.text(0.5, 0.005, "'(' : push 0      ')' : v = pop();  top += max(2v, 1)      green = innermost \"()\" (+1),  orange = wrap a group (×2)",
+             ha="center", va="bottom", color=MUTED, fontsize=10.5)
+    fig.tight_layout(rect=[0, 0.04, 1, 1])
+    save(fig, "856_stack.png")
+
+
 def main():
     plot_115()
     plot_940()
@@ -1231,6 +1333,8 @@ def main():
     plot_678_band()
     plot_678_dp_vs_interval()
     plot_678_fail()
+    plot_856_depth()
+    plot_856_stack()
     print("---")
     for p in sorted(OUT.glob("*.png")):
         print(f"{p.stat().st_size:8d}  {p.name}")
