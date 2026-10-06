@@ -1313,6 +1313,85 @@ def plot_856_stack():
     save(fig, "856_stack.png")
 
 
+# ── 921 Minimum Add to Make Parentheses Valid ──────────────────────────────
+S921 = "()))((()("
+
+
+def plot_921_clamped():
+    s = S921
+    n = len(s)
+    bal = [0]
+    adds = 0
+    events = []
+    for i, c in enumerate(s):
+        b = bal[-1]
+        if c == "(":
+            b += 1
+        elif b:
+            b -= 1
+        else:
+            adds += 1
+            events.append(i)
+        bal.append(b)
+    x = np.arange(n + 1)
+    fig, ax = plt.subplots(figsize=(11, 5.4))
+    ax.axhspan(-1.2, 0, color=CRIT, alpha=0.07, zorder=0)
+    ax.text(n + 0.4, -0.6, "floor: balance\ncan't go < 0", color=CRIT, fontsize=9, ha="right", va="center")
+    ax.fill_between(x, 0, bal, color=ACCENT, alpha=0.12, zorder=1)
+    ax.plot(x, bal, color=ACCENT, linewidth=2.4, marker="o", markersize=5, zorder=3, label="open = unmatched '(' so far")
+    for k, i in enumerate(events):
+        ax.scatter([i + 1], [0], s=260, marker="X", color=CRIT, zorder=5, edgecolor=BG, linewidth=1.2)
+        ax.annotate(f"')' with open = 0\n→ insert '('  (adds = {k+1})", xy=(i + 1, 0), xytext=(i + 1 + (-0.7 if k % 2 == 0 else 0.7), -0.55 - 0.8 * k),
+                    color=CRIT, fontsize=9.5, ha="center", va="top",
+                    arrowprops=dict(arrowstyle="->", color=CRIT, lw=1.1))
+    ax.annotate("", xy=(n, bal[-1]), xytext=(n, 0), arrowprops=dict(arrowstyle="<->", color=WARN, lw=2))
+    ax.text(n - 0.15, bal[-1] / 2, f"leftover open = {bal[-1]}\n→ append {bal[-1]} × ')'", color=WARN, fontsize=10, ha="right", va="center")
+    style_ax(ax, f"921 · greedy scan of s = \"{s}\" — clamp at 0, count every bump against the floor")
+    ax.set_xticks(x)
+    ax.set_xticklabels(["start"] + [f"{i+1}\n{c}" for i, c in enumerate(s)], color=TEXT, fontsize=11)
+    ax.set_xlabel("prefix length · character consumed", color=MUTED)
+    ax.set_ylabel("open (unmatched '(')", color=MUTED)
+    ax.set_ylim(-2.4, max(bal) + 1.2)
+    ax.set_xlim(-0.5, n + 0.6)
+    ax.set_yticks(range(max(bal) + 1))
+    ax.grid(alpha=0.10, color=MUTED)
+    ax.text(0.01, 0.97, f"answer = adds + open = {adds} + {bal[-1]} = {adds + bal[-1]}", transform=ax.transAxes, ha="left", va="top",
+            color=TEXT, fontsize=12, bbox=dict(facecolor=PANEL, edgecolor=BORDER, boxstyle="round,pad=0.4"))
+    fig.tight_layout()
+    save(fig, "921_clamped.png")
+
+
+def plot_921_prefix():
+    s = S921
+    n = len(s)
+    P = [0]
+    for c in s:
+        P.append(P[-1] + (1 if c == "(" else -1))
+    m = min(0, min(P))
+    x = np.arange(n + 1)
+    fig, ax = plt.subplots(figsize=(11, 5.4))
+    ax.axhline(0, color=MUTED, linewidth=1, alpha=0.6)
+    ax.axhline(m, color=CRIT, linewidth=1.6, linestyle="--")
+    ax.plot(x, P, color=ACCENT2, linewidth=2.4, marker="o", markersize=5, zorder=3)
+    ax.fill_between(x, P, 0, where=[p < 0 for p in P], color=CRIT, alpha=0.12, interpolate=True)
+    ax.annotate("", xy=(0.35, m), xytext=(0.35, 0), arrowprops=dict(arrowstyle="<->", color=CRIT, lw=2))
+    ax.text(0.5, m / 2, f"−min P = {-m}\n'(' to prepend", color=CRIT, fontsize=10, va="center")
+    ax.annotate("", xy=(n + 0.3, P[-1]), xytext=(n + 0.3, m), arrowprops=dict(arrowstyle="<->", color=WARN, lw=2))
+    ax.text(n + 0.15, (P[-1] + m) / 2, f"P_n − min P = {P[-1] - m}\n')' to append", color=WARN, fontsize=10, ha="right", va="center")
+    style_ax(ax, f"921 · same answer from the raw prefix balance P of \"{s}\" (no clamping)")
+    ax.set_xticks(x)
+    ax.set_xticklabels(["start"] + [f"{i+1}\n{c}" for i, c in enumerate(s)], color=TEXT, fontsize=11)
+    ax.set_xlabel("prefix length · character consumed", color=MUTED)
+    ax.set_ylabel("P = #'(' − #')'", color=MUTED)
+    ax.set_xlim(-0.3, n + 0.7)
+    ax.set_ylim(m - 1, max(P) + 1.3)
+    ax.grid(alpha=0.10, color=MUTED)
+    ax.text(0.99, 0.97, f"answer = −min P + (P_n − min P) = {-m} + {P[-1] - m} = {P[-1] - 2 * m}", transform=ax.transAxes,
+            ha="right", va="top", color=TEXT, fontsize=12, bbox=dict(facecolor=PANEL, edgecolor=BORDER, boxstyle="round,pad=0.4"))
+    fig.tight_layout()
+    save(fig, "921_prefix.png")
+
+
 def main():
     plot_115()
     plot_940()
@@ -1335,6 +1414,8 @@ def main():
     plot_678_fail()
     plot_856_depth()
     plot_856_stack()
+    plot_921_clamped()
+    plot_921_prefix()
     print("---")
     for p in sorted(OUT.glob("*.png")):
         print(f"{p.stat().st_size:8d}  {p.name}")

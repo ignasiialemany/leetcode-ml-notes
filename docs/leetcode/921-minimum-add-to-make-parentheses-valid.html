@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>921. Minimum Add to Make Parentheses Valid · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/minimum-add-to-make-parentheses-valid/">Open on LeetCode ↗</a></p>
+    <h1>921. Minimum Add to Make Parentheses Valid</h1>
+    <p class="lead"><span class="tag">Greedy balance counter: clamp at 0, adds + leftover open</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>Valid means two things: every prefix has at least as many <code>(</code> as <code>)</code>, and the totals are equal. Track <code>open</code> = unmatched <code>(</code> so far. Two kinds of defect exist, and each costs exactly one insertion:</p>
+    <ul>
+      <li>A <code>)</code> arriving when <code>open = 0</code> can never be matched by anything to its right, so some <code>(</code> must be inserted before it: <code>adds += 1</code>, and <code>open</code> stays at 0 (the inserted pair cancels).</li>
+      <li>Every <code>(</code> still open at the end needs one <code>)</code> appended.</li>
+    </ul>
+    $$\text{answer} = \text{adds} + \text{open}_{\text{end}}$$
+    <p>Greedy is optimal because each insertion fixes at most one defect: one inserted <code>(</code> rescues one orphan <code>)</code>, one inserted <code>)</code> closes one leftover <code>(</code>. No stack is needed since there's only one bracket type, so the stack is just a counter.</p></div>
+
+    <h2>Watch the counter bump against the floor</h2>
+    <p>Scan <code>()))((()(</code>. The counter rides above zero; each time a <code>)</code> tries to push it below the floor we pay one <code>(</code> instead. Whatever height is left at the end is paid in <code>)</code>.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/921_clamped.png" alt="Clamped open counter for ()))((()(: two hits on the floor at positions 3 and 4, leftover open 3 at the end, answer 5" /></div>
+    <p class="caption">Two orphan <code>)</code> at positions 3 and 4 give adds = 2; the tail <code>((()(</code> leaves 3 open. Answer \(2 + 3 = 5\), e.g. <code>(()(</code>… → <code>(()))</code> style fixes: <code>((()))((()()))</code>.</p>
+
+    <h2>Same thing without clamping: prefix minimum</h2>
+    <p>Let \(P_i\) be the raw balance \(\#\texttt{(} - \#\texttt{)}\) of the first \(i\) characters. Clamping at 0 is the same as remembering how deep \(P\) ever dove. You must prepend \(-\min P\) opens to lift the whole curve onto the floor, which shifts the end to \(P_n - \min P\), the number of closes to append:</p>
+    $$\text{answer} = -\min_i P_i + \big(P_n - \min_i P_i\big) = P_n - 2\min\!\big(0,\ \min_i P_i\big)$$
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/921_prefix.png" alt="Raw prefix balance of ()))((()( dipping to −2, ending at 1; answer = 2 + 3 = 5" /></div>
+    <p class="caption">The dip to \(-2\) is the 2 orphan closes; lifting by 2 puts the end at \(1 + 2 = 3\). This view is handy when the question is "where should the inserts go": all the opens can go at the front and all the closes at the back.</p>
+
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def minAddToMakeValid(self, s: str) -&gt; int:
+        open_ = 0   # unmatched '(' so far
+        adds = 0    # '(' we must insert for unmatched ')'
+        for c in s:
+            if c == '(':
+                open_ += 1
+            elif open_:
+                open_ -= 1
+            else:
+                adds += 1
+        return adds + open_</code></pre>
+
+    <h2>Complexity</h2>
+    <p>One pass, two counters: \(O(n)\) time, \(O(1)\) space. Same skeleton as <a href="/leetcode-ml-notes/leetcode/20-valid-parentheses.html">20</a> with one bracket type, and the clamped counter is the single-path cousin of the \([lo, hi]\) band in <a href="/leetcode-ml-notes/leetcode/678-valid-parenthesis-string.html">678</a>.</p>
+
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>

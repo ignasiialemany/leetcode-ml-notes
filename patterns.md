@@ -7,6 +7,15 @@ How to read an entry: **when** (the tell) → **move** (what you do) → **probl
 ---
 
 
+## Greedy balance counter: clamp at 0, adds + leftover open
+
+**When:** one bracket type, "minimum insertions to make valid" — every defect is either an orphan `)` or a leftover `(`.
+
+**Move:** scan with `open`; on `)` with `open == 0` do `adds += 1` (insert a `(`, counter stays 0); else decrement. Answer `adds + open`. Equivalent closed form on raw prefix balance P: `P_n − 2·min(0, min P)`.
+
+- **921** Minimum Add to Make Parentheses Valid: clamped counter, adds + open. O(n)/O(1).
+
+
 ## Depth counting: innermost () at depth d adds 2^d
 
 **When:** a score/value defined recursively on a balanced paren string where concatenation adds and wrapping multiplies (`()`=1, `AB`=A+B, `(A)`=2A).
