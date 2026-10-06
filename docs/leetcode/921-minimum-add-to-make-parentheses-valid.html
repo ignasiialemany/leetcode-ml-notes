@@ -40,7 +40,7 @@
     <h2>Watch the counter bump against the floor</h2>
     <p>Scan <code>()))((()(</code>. The counter rides above zero; each time a <code>)</code> tries to push it below the floor we pay one <code>(</code> instead. Whatever height is left at the end is paid in <code>)</code>.</p>
     <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/921_clamped.png" alt="Clamped open counter for ()))((()(: two hits on the floor at positions 3 and 4, leftover open 3 at the end, answer 5" /></div>
-    <p class="caption">Two orphan <code>)</code> at positions 3 and 4 give adds = 2; the tail <code>((()(</code> leaves 3 open. Answer \(2 + 3 = 5\), e.g. <code>(()(</code>… → <code>(()))</code> style fixes: <code>((()))((()()))</code>.</p>
+    <p class="caption">Two orphan <code>)</code> at positions 3 and 4 give adds = 2; the tail <code>((()(</code> leaves 3 open. Answer \(2 + 3 = 5\): prepend <code>((</code> and append <code>)))</code> to get <code>((()))((()()))</code>.</p>
 
     <h2>Same thing without clamping: prefix minimum</h2>
     <p>Let \(P_i\) be the raw balance \(\#\texttt{(} - \#\texttt{)}\) of the first \(i\) characters. Clamping at 0 is the same as remembering how deep \(P\) ever dove. You must prepend \(-\min P\) opens to lift the whole curve onto the floor, which shifts the end to \(P_n - \min P\), the number of closes to append:</p>
