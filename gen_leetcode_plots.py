@@ -1391,6 +1391,178 @@ def plot_921_prefix():
     fig.tight_layout()
     save(fig, "921_prefix.png")
 
+# ── 301 Remove Invalid Parentheses ─────────────────────────────────────────
+S301 = "()())()"
+
+
+def _301_budget(s):
+    """Clamped counter: r = unmatched ')', l = leftover '('. Returns (l, r, clamped, raw, orphans)."""
+    l = r = 0
+    clamped, raw, orphans = [0], [0], []
+    for i, c in enumerate(s):
+        if c == "(":
+            l += 1
+        elif c == ")":
+            if l:
+                l -= 1
+            else:
+                r += 1
+                orphans.append(i)
+        clamped.append(l)
+        raw.append(raw[-1] + (c == "(") - (c == ")"))
+    return l, r, clamped, raw, orphans
+
+
+def _301_dfs_tree(s):
+    """Instrumented exact-budget DFS (same as the solution). Returns nodes with parent/how/status."""
+    n = len(s)
+    l0, r0, *_ = _301_budget(s)
+    nodes = []
+
+    def dfs(i, l, r, bal, path, parent, how):
+        k = len(nodes)
+        nodes.append(dict(i=i, l=l, r=r, bal=bal, path=path, parent=parent, how=how, status=None, kids=[]))
+        if parent is not None:
+            nodes[parent]["kids"].append(k)
+        if bal < 0:
+            nodes[k]["status"] = "neg"
+            return
+        if bal > n - i:
+            nodes[k]["status"] = "toohigh"
+            return
+        if i == n:
+            nodes[k]["status"] = "valid" if (l == 0 and r == 0 and bal == 0) else "budget"
+            return
+        c = s[i]
+        if c == "(" and l > 0:
+            dfs(i + 1, l - 1, r, bal, path, k, "del")
+        elif c == ")" and r > 0:
+            dfs(i + 1, l, r - 1, bal, path, k, "del")
+        dfs(i + 1, l, r, bal + (c == "(") - (c == ")"), path + c, k, "keep")
+
+    dfs(0, l0, r0, 0, "", None, None)
+    return nodes
+
+
+def plot_301_balance():
+    s = S301
+    n = len(s)
+    l, r, bal, raw, orphans = _301_budget(s)
+    assert (l, r) == (0, 1) and orphans == [4]
+    x = np.arange(n + 1)
+    first = orphans[0]
+    fig, ax = plt.subplots(figsize=(11, 5.4))
+    ax.axhspan(-1.6, 0, color=CRIT, alpha=0.07, zorder=0)
+    ax.text(n + 0.45, -1.3, "floor: a prefix may never\nhave more ')' than '('", color=CRIT, fontsize=9, ha="right", va="center")
+    # region of ')' that can absorb the orphan: any ')' at or before it
+    ax.axvspan(0.5, first + 1.5, color=WARN, alpha=0.06, zorder=0)
+    cand = [i for i in range(first + 1) if s[i] == ")"]
+    ax.text((first + 2) / 2, max(bal) + 0.45, f"deleting any ')' in here fixes the dip  (indices {', '.join(map(str, cand))})",
+            color=WARN, fontsize=9.5, ha="center", va="center")
+    ax.plot(x, raw, color=CRIT, linewidth=1.3, linestyle="--", alpha=0.7, zorder=2, label="raw balance (no clamp)")
+    ax.fill_between(x, 0, bal, color=ACCENT, alpha=0.12, zorder=1, step=None)
+    ax.plot(x, bal, color=ACCENT, linewidth=2.4, marker="o", markersize=5, zorder=3, label="clamped counter = unmatched '(' so far")
+    for k, i in enumerate(orphans):
+        ax.scatter([i + 1], [0], s=260, marker="X", color=CRIT, zorder=5, edgecolor=BG, linewidth=1.2)
+        ax.annotate(f"')' at index {i} finds open = 0\n→ unmatched ')'  (r = {k + 1})", xy=(i + 1, 0), xytext=(1.7, -1.0),
+                    color=CRIT, fontsize=9.5, ha="center", va="center",
+                    arrowprops=dict(arrowstyle="->", color=CRIT, lw=1.1))
+    ax.annotate(f"leftover '(' at end: l = {bal[-1]}", xy=(n, bal[-1]), xytext=(n - 0.05, max(bal) + 0.75),
+                color=ACCENT2, fontsize=10, ha="right", va="center",
+                arrowprops=dict(arrowstyle="->", color=ACCENT2, lw=1.1))
+    style_ax(ax, f"301 · one balance scan of s = \"{s}\" gives the exact deletion budget (l, r) = ({l}, {r})")
+    ax.set_xticks(x)
+    ax.set_xticklabels(["start"] + [f"{i}\n{c}" for i, c in enumerate(s)], color=TEXT, fontsize=11)
+    for t, i in zip(ax.get_xticklabels()[1:], range(n)):
+        if i in cand:
+            t.set_color(WARN)
+    ax.set_xlabel("index · character consumed", color=MUTED)
+    ax.set_ylabel("open (unmatched '(')", color=MUTED)
+    ax.set_ylim(-1.6, max(bal) + 2.0)
+    ax.set_xlim(-0.5, n + 0.6)
+    ax.set_yticks(range(-1, max(bal) + 1))
+    ax.grid(alpha=0.10, color=MUTED)
+    ax.legend(facecolor=PANEL, edgecolor=BORDER, labelcolor=TEXT, fontsize=9, loc="upper right")
+    ax.text(0.01, 0.97, f"min deletions = l + r = {l} + {r} = {l + r}", transform=ax.transAxes, ha="left", va="top",
+            color=TEXT, fontsize=12, bbox=dict(facecolor=PANEL, edgecolor=BORDER, boxstyle="round,pad=0.4"))
+    fig.tight_layout()
+    save(fig, "301_balance.png")
+
+
+def plot_301_dfs():
+    s = S301
+    n = len(s)
+    nodes = _301_dfs_tree(s)
+    leaves = [k for k, d in enumerate(nodes) if not d["kids"]]
+    # lanes: reverse DFS leaf order so the all-keep trunk sits on top (lane 0)
+    lane = {}
+    for j, k in enumerate(reversed(leaves)):
+        lane[k] = j
+    for k in reversed(range(len(nodes))):
+        if nodes[k]["kids"]:
+            lane[k] = min(lane[c] for c in nodes[k]["kids"])
+    valid = [k for k in leaves if nodes[k]["status"] == "valid"]
+    answers = sorted({nodes[k]["path"] for k in valid})
+    assert answers == ["(())()", "()()()"] and len(valid) == 3
+    nlanes = len(leaves)
+
+    fig, ax = plt.subplots(figsize=(12.5, 6.2))
+    Y = lambda k: -lane[k]
+    # edges
+    for k, d in enumerate(nodes):
+        p = d["parent"]
+        if p is None:
+            continue
+        x0, y0, x1, y1 = nodes[p]["i"], Y(p), d["i"], Y(k)
+        c = s[nodes[p]["i"]]
+        if d["how"] == "del":
+            ax.plot([x0, x0 + 0.25, x1], [y0, y1, y1], color=WARN, linewidth=2, linestyle="--", zorder=1)
+            ax.text(x0 - 0.02, (y0 + y1) / 2, f"✂ del '{c}' @{x0}", color=WARN, fontsize=9, ha="right", va="center")
+        else:
+            col = CRIT if d["status"] == "neg" else MUTED
+            ax.plot([x0, x1], [y0, y1], color=col, linewidth=1.6, zorder=1)
+            ax.text((x0 + x1) / 2, y1 + 0.13, c, color=TEXT, fontsize=11, ha="center", va="bottom", family="monospace")
+    # nodes
+    for k, d in enumerate(nodes):
+        x, y = d["i"], Y(k)
+        if d["status"] == "neg":
+            ax.scatter([x], [y], s=320, marker="X", color=CRIT, zorder=4, edgecolor=BG, linewidth=1.2)
+            ax.text(x + 0.25, y, f"keep ')' → bal = {d['bal']} < 0\npruned (and the ')' at {n - 1}\nis never even considered)",
+                    color=CRIT, fontsize=9, ha="left", va="center")
+            continue
+        fc = ACCENT if d["r"] + d["l"] > 0 else ACCENT2
+        ax.scatter([x], [y], s=360, color=fc, zorder=3, edgecolor=BG, linewidth=1.2)
+        ax.text(x, y, str(d["bal"]), color=BG, fontsize=9.5, ha="center", va="center", fontweight="bold", zorder=5)
+        if d["status"] == "valid":
+            ax.text(x + 0.3, y, f"\"{d['path']}\"", color=ACCENT2, fontsize=11, ha="left", va="center", family="monospace")
+    # set box merging duplicates
+    sx, sy = n + 2.2, -(nlanes - 1) / 2 - 0.5
+    for k in valid:
+        ax.annotate("", xy=(sx - 0.62, sy - 0.2 * answers.index(nodes[k]["path"])), xytext=(n + 1.1, Y(k)),
+                    arrowprops=dict(arrowstyle="->", color=ACCENT2, lw=1.1, alpha=0.8))
+    ax.text(sx, sy, "set\n" + "\n".join(f"\"{a}\"" for a in answers), color=TEXT, fontsize=11, ha="center", va="center",
+            family="monospace", bbox=dict(facecolor=PANEL, edgecolor=ACCENT2, boxstyle="round,pad=0.5"))
+    dup = [nodes[k]["path"] for k in valid]
+    ax.text(sx, sy - 0.95, f"{len(dup)} leaves → {len(answers)} unique\n(del @3 and del @4 give\nthe same string)", color=MUTED,
+            fontsize=9, ha="center", va="top")
+    style_ax(ax, f"301 · exact-budget DFS on \"{s}\" (l, r) = (0, 1): node = running balance, every branch spends the budget")
+    ax.set_xticks(range(n + 1))
+    ax.set_xticklabels([f"{i}\n{s[i]}" for i in range(n)] + ["end"], color=TEXT, fontsize=11)
+    ax.set_xlabel("decision at index · character", color=MUTED)
+    ax.set_yticks([])
+    ax.set_xlim(-0.5, n + 3.3)
+    ax.set_ylim(-(nlanes - 1) - 1.4, 0.8)
+    handles = [plt.Line2D([], [], marker="o", linestyle="", color=ACCENT, markersize=10, label="budget left (r = 1): may delete next ')'"),
+               plt.Line2D([], [], marker="o", linestyle="", color=ACCENT2, markersize=10, label="budget spent (r = 0): forced to keep"),
+               plt.Line2D([], [], color=WARN, linestyle="--", label="delete branch"),
+               plt.Line2D([], [], color=MUTED, label="keep branch (char shown)")]
+    ax.legend(handles=handles, facecolor=PANEL, edgecolor=BORDER, labelcolor=TEXT, fontsize=9, loc="lower left")
+    fig.text(0.5, 0.005, f"{len(nodes)} DFS calls total · {len(valid)} valid leaves · 1 prune by bal < 0 · "
+             f"BFS would build all {len(set(s[:i] + s[i+1:] for i in range(n)))} unique one-deletion strings and test each",
+             ha="center", va="bottom", color=MUTED, fontsize=10.5)
+    fig.tight_layout(rect=[0, 0.04, 1, 1])
+    save(fig, "301_dfs.png")
+
 
 def main():
     plot_115()
@@ -1416,6 +1588,8 @@ def main():
     plot_856_stack()
     plot_921_clamped()
     plot_921_prefix()
+    plot_301_balance()
+    plot_301_dfs()
     print("---")
     for p in sorted(OUT.glob("*.png")):
         print(f"{p.stat().st_size:8d}  {p.name}")

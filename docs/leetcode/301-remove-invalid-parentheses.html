@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>301. Remove Invalid Parentheses · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/remove-invalid-parentheses/">Open on LeetCode ↗</a></p>
+    <h1>301. Remove Invalid Parentheses</h1>
+    <p class="lead"><span class="tag">Count min removals first, then keep/delete backtracking with exact budgets</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>Two questions hide in this problem: <em>how many</em> characters to delete, and <em>which</em> ones. Answer the first exactly before searching, and the search shrinks to only strings that are already the right length.</p>
+    <ul>
+      <li><strong>How many:</strong> run the clamped counter from <a href="/leetcode-ml-notes/leetcode/921-minimum-add-to-make-parentheses-valid.html">921</a>. Every <code>)</code> that arrives when the counter is 0 is an orphan (\(r\) of them), and whatever is still open at the end is \(l\) leftover <code>(</code>. Deleting is the mirror image of inserting: an orphan <code>)</code> can be fixed by deleting a <code>)</code> instead of inserting a <code>(</code>. So the minimum is exactly \(l + r\), and we know that it means \(l\) opens and \(r\) closes.</li>
+      <li><strong>Which:</strong> walk the string with a running balance. At each paren you either <em>keep</em> it or <em>delete</em> it, and deleting is only allowed while that bracket type still has budget. Cut a branch as soon as the balance goes negative (an orphan <code>)</code> you can never repair) or exceeds the characters left (too many opens to close). A leaf counts only if both budgets hit 0 and the balance ends at 0.</li>
+    </ul>
+    $$\underbrace{(l,\ r)}_{\text{one scan}} \;\Rightarrow\; \text{DFS over } \binom{\#\texttt{(}}{l}\binom{\#\texttt{)}}{r} \text{ deletion patterns at most, pruned by } 0 \le \text{bal} \le n - i$$
+    <p>Different deletion patterns can give the same string, e.g. deleting either of two neighbouring <code>))</code>, so the leaves go into a <strong>set</strong>. Every string in the set is automatically minimal because every branch spent exactly \(l + r\) deletions.</p></div>
+
+    <h2>Step 1: the balance scan sets the budget</h2>
+    <p>Scan <code>()())()</code> with the clamped counter. It touches 0 after <code>()()</code>, and the next <code>)</code> at index 4 has nothing to match: that is the one orphan, so \(r = 1\). The counter ends at 0, so \(l = 0\). Exactly one <code>)</code> must go, and no <code>(</code>.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/301_balance.png" alt="Clamped balance counter for ()())(): orphan ')' at index 4 gives r = 1, ends at l = 0; the raw balance dips to −1; candidate ')' at indices 1, 3, 4" /></div>
+    <p class="caption">The dashed raw balance dips to \(-1\) at index 4. To lift that dip, a <code>)</code> <em>at or before</em> index 4 has to go (indices 1, 3, 4, shaded). Deleting the <code>)</code> at index 6 can't help because it comes after the dip. Min deletions \(= l + r = 0 + 1 = 1\).</p>
+
+    <h2>Step 2: keep/delete DFS with exact budgets</h2>
+    <p>Each node is the running balance after deciding one character. While \(r = 1\) (blue) every <code>)</code> forks into "delete" or "keep". Once the budget is spent (green) the path is forced: keep everything, and just check it stays valid.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/301_dfs.png" alt="Pruned DFS tree for ()())() with budget r = 1: delete at index 1, 3 or 4 gives valid leaves (())(), ()()(), ()()(); keeping all closes hits balance −1 at index 4 and is pruned; the set holds 2 unique answers" /></div>
+    <p class="caption">19 calls in total. Deleting at index 1 gives <code>(())()</code>, and deleting at index 3 or 4 gives <code>()()()</code> twice, which the set merges into 2 answers. The all-keep trunk dies at index 4 (balance \(-1\)), so the branch "delete the <code>)</code> at 6" is never even generated.</p>
+
+    <h2>Contrast: BFS by level</h2>
+    <p>The other classic approach skips step 1. Level \(k\) holds every unique string with \(k\) characters deleted. Build each level from the previous one by deleting one paren in every possible spot, and stop at the first level that contains a valid string. It's correct because the first valid level is the minimum, but it pays for not knowing the budget up front. It generates and tests whole strings (6 unique one-deletion strings here, \(O(n)\) each), it can't prune a prefix early, and levels can grow to \(\binom{n}{k}\). The budgeted DFS only builds strings whose length is already right, and it kills bad prefixes as soon as they appear.</p>
+
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def removeInvalidParentheses(self, s: str) -&gt; List[str]:
+        # 1) Count the minimum removals: unmatched ')' (r) and leftover '(' (l).
+        l = r = 0
+        for c in s:
+            if c == '(':
+                l += 1
+            elif c == ')':
+                if l:
+                    l -= 1
+                else:
+                    r += 1
+
+        n = len(s)
+        res = set()
+        path = []
+
+        # 2) DFS: at each paren either delete it (if budget allows) or keep it,
+        #    never letting the running balance go negative.
+        def dfs(i: int, l: int, r: int, bal: int) -&gt; None:
+            if bal &lt; 0 or bal &gt; n - i:
+                return
+            if i == n:
+                if l == 0 and r == 0 and bal == 0:
+                    res.add(''.join(path))
+                return
+            c = s[i]
+            if c == '(' and l &gt; 0:
+                dfs(i + 1, l - 1, r, bal)
+            elif c == ')' and r &gt; 0:
+                dfs(i + 1, l, r - 1, bal)
+            path.append(c)
+            if c == '(':
+                dfs(i + 1, l, r, bal + 1)
+            elif c == ')':
+                dfs(i + 1, l, r, bal - 1)
+            else:
+                dfs(i + 1, l, r, bal)
+            path.pop()
+
+        dfs(0, l, r, 0)
+        return list(res)</code></pre>
+
+    <h2>Complexity</h2>
+    <p>Worst case \(O(2^{p} \cdot n)\) time for \(p \le 20\) parens (each paren is keep/delete, plus joining a leaf), but the exact budgets and the \(0 \le \text{bal} \le n-i\) window prune nearly all of it in practice. Space is \(O(n)\) recursion and path, plus the output set. Step 1 is the <a href="/leetcode-ml-notes/leetcode/921-minimum-add-to-make-parentheses-valid.html">921</a> counter word for word, and step 2 is the generate-with-counts backtracking of <a href="/leetcode-ml-notes/leetcode/22-generate-parentheses.html">22</a>, run as deletions on a fixed string.</p>
+
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>

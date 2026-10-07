@@ -7,6 +7,15 @@ How to read an entry: **when** (the tell) → **move** (what you do) → **probl
 ---
 
 
+## Count min removals first, then keep/delete backtracking with exact budgets
+
+**When:** "remove the minimum number of invalid parentheses, return all results" — small n, need every optimal string, not just the count.
+
+**Move:** one clamped-counter scan gives r = orphan `)` and l = leftover `(` = the exact minimum deletions by type. DFS keep/delete per paren, delete only while that type's budget > 0; prune when bal < 0 or bal > chars left; accept leaf iff l = r = bal = 0; collect in a set (adjacent equal parens give duplicates). BFS-by-level (delete one char per level, stop at first valid level) is the budget-free alternative.
+
+- **301** Remove Invalid Parentheses: (l, r) from the 921 scan, then exact-budget backtracking + set. Worst O(2^p·n), heavily pruned.
+
+
 ## Greedy balance counter: clamp at 0, adds + leftover open
 
 **When:** one bracket type, "minimum insertions to make valid" — every defect is either an orphan `)` or a leftover `(`.
