@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>1541. Minimum Insertions to Balance a Parentheses String · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+
+    <p><a class="ext" href="https://leetcode.com/problems/minimum-insertions-to-balance-a-parentheses-string/">Open on LeetCode ↗</a></p>
+    <h1>1541. Minimum Insertions to Balance a Parentheses String</h1>
+    <p class="lead"><span class="tag">Greedy balance counter: each '(' owes two ')', fix odd need before a new '('</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>Here a <code>(</code> is closed by two <em>consecutive</em> <code>)</code>. It's <a href="/leetcode-ml-notes/leetcode/921-minimum-add-to-make-parentheses-valid.html">921</a> with a twist: track <code>need</code> = how many <code>)</code> are still owed. Each <code>(</code> adds 2 and each <code>)</code> pays 1. Two things can go wrong, and each costs one insertion:</p>
+    <ul>
+      <li><strong>Orphan <code>)</code>.</strong> A <code>)</code> arrives when nothing is owed (<code>need</code> would hit \(-1\)). Insert a <code>(</code> before it. That <code>(</code> owes 2 and this <code>)</code> pays one, so <code>need</code> becomes 1.</li>
+      <li><strong>Odd need when a <code>(</code> arrives.</strong> Odd <code>need</code> means the innermost <code>(</code> has received exactly one <code>)</code>. The two closers must be adjacent, so a new <code>(</code> can't sit between them. Insert the missing <code>)</code> now (<code>need -= 1</code>), then open the new pair.</li>
+    </ul>
+    <p>At the end, whatever is still owed gets appended:</p>
+    $$\text{answer} = \text{ins} + \text{need}_{\text{end}}$$
+    <p>Why parity is the right test: complete pairs always contribute an even amount to <code>need</code>, so <code>need</code> is odd exactly when one <code>(</code> is half-closed. A <code>)</code> arriving on odd need is fine because it finishes that pair. Only a <code>(</code> arriving on odd need breaks adjacency. Both fixes are forced, since no later character can repair them, so greedy is optimal.</p></div>
+
+    <h2>Watch need pay down and get lifted</h2>
+    <p>Scan <code>))())(</code>. The first <code>)</code> has nothing to pay for, so the counter would dip to \(-1\). Inserting a <code>(</code> lifts it to 1, and the next <code>)</code> finishes that pair. After that, each <code>(</code> jumps the counter by 2 and each <code>)</code> walks it down by 1.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/1541_need.png" alt="need counter for ))())(: dips to −1 at position 1, lifted to 1 by an inserted '(', ends at 2; answer 1 + 2 = 3" /></div>
+    <p class="caption">One orphan <code>)</code> (ins = 1) and the trailing <code>(</code> still owes 2. Answer \(1 + 2 = 3\): <code>(</code>+<code>))())(</code>+<code>))</code> = <code>())())())</code>: three <code>(</code>, each followed by <code>))</code>.</p>
+
+    <h2>The parity view: when odd need forces a ')'</h2>
+    <p>Now <code>()(()))(</code>. Colour the counter by parity just before each character. Blue (even) means every open <code>(</code> is either untouched or fully closed. Orange (odd) means one <code>(</code> has received a single <code>)</code> and is waiting for its partner.</p>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/1541_parity.png" alt="Parity bars for ()(()))(: need before each char; '(' at positions 3 and 8 arrives on odd need 1, forcing an inserted ')'; leftover 2; answer 4" /></div>
+    <p class="caption">Positions 3 and 8 are <code>(</code> arriving on odd need, so each forces a <code>)</code> (red). Position 6 is also odd, but there a <code>)</code> arrives and simply completes the pair. Answer \(2 + 2 = 4\): <code>())(()))())</code>.</p>
+    <p>Formally, write \(\text{need}\) before a <code>(</code> at position \(i\). Then</p>
+    $$\text{ins} \mathrel{+}= [\text{need}_i \bmod 2 = 1],\qquad \text{need}_{i+1} = \text{need}_i - (\text{need}_i \bmod 2) + 2$$
+
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def minInsertions(self, s: str) -&gt; int:
+        ins = need = 0  # need = ')' still required
+        for c in s:
+            if c == '(':
+                if need % 2:      # odd need: insert a ')' to close the pending pair
+                    ins += 1; need -= 1
+                need += 2
+            else:
+                need -= 1
+                if need &lt; 0:      # unmatched ')': insert a '('
+                    ins += 1; need += 2
+        return ins + need</code></pre>
+
+    <h2>Complexity</h2>
+    <p>One pass, two counters: \(O(n)\) time, \(O(1)\) space. It's the <a href="/leetcode-ml-notes/leetcode/921-minimum-add-to-make-parentheses-valid.html">921</a> clamped counter with a cost of 2 per open plus a parity check. Compare <a href="/leetcode-ml-notes/leetcode/678-valid-parenthesis-string.html">678</a> (a band of possible counts instead of one) and <a href="/leetcode-ml-notes/leetcode/20-valid-parentheses.html">20</a> (the stack version that the counter replaces).</p>
+
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>

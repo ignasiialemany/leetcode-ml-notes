@@ -1564,6 +1564,123 @@ def plot_301_dfs():
     save(fig, "301_dfs.png")
 
 
+# ── 1541 Minimum Insertions to Balance a Parentheses String ────────────────
+S1541_A = "))())("
+S1541_B = "()(()))("
+
+
+def _trace_1541(s):
+    """Return per-step need (after each char), raw dips, and insertion events."""
+    ins = need = 0
+    after, events = [0], []
+    for i, c in enumerate(s):
+        if c == "(":
+            if need % 2:
+                ins += 1
+                events.append((i, "odd", need))
+                need -= 1
+            need += 2
+        else:
+            need -= 1
+            if need < 0:
+                ins += 1
+                events.append((i, "orphan", need))
+                need += 2
+        after.append(need)
+    return after, events, ins
+
+
+def plot_1541_need():
+    s = S1541_A
+    n = len(s)
+    need, events, ins = _trace_1541(s)
+    x = np.arange(n + 1)
+    fig, ax = plt.subplots(figsize=(11, 5.4))
+    ax.axhspan(-1.6, 0, color=CRIT, alpha=0.07, zorder=0)
+    ax.text(n + 0.45, -0.8, "need < 0:\norphan ')'", color=CRIT, fontsize=9, ha="right", va="center")
+    ax.fill_between(x, 0, need, step=None, color=ACCENT, alpha=0.12, zorder=1)
+    ax.plot(x, need, color=ACCENT, linewidth=2.4, marker="o", markersize=6, zorder=3,
+            label="need = ')' still owed")
+    for i, kind, raw in events:
+        # the raw dip below zero, then the lift by the inserted '('
+        ax.plot([i, i + 1], [need[i], raw], color=CRIT, linestyle=":", linewidth=1.6, zorder=2)
+        ax.scatter([i + 1], [raw], s=220, marker="X", color=CRIT, zorder=5, edgecolor=BG, linewidth=1.2)
+        ax.annotate("", xy=(i + 1, need[i + 1]), xytext=(i + 1, raw),
+                    arrowprops=dict(arrowstyle="->", color=CRIT, lw=2))
+        ax.annotate("')' with nothing owed → insert '('\nthat '(' owes 2, this ')' pays 1 → need = 1",
+                    xy=(i + 1, raw), xytext=(i + 2.1, -1.15), color=CRIT, fontsize=9.5, ha="left", va="center",
+                    arrowprops=dict(arrowstyle="->", color=CRIT, lw=1.1))
+    for i, c in enumerate(s):
+        if c == "(":
+            ax.annotate("+2", xy=(i + 1, need[i + 1]), xytext=(i + 1, need[i + 1] + 0.45), color=ACCENT2,
+                        fontsize=10, ha="center", fontweight="bold")
+    ax.annotate("", xy=(n + 0.15, need[-1]), xytext=(n + 0.15, 0), arrowprops=dict(arrowstyle="<->", color=WARN, lw=2))
+    ax.text(n - 0.1, need[-1] / 2 + 0.1, f"leftover need = {need[-1]}\n→ append {need[-1]} × ')'", color=WARN,
+            fontsize=10, ha="right", va="center")
+    style_ax(ax, f"1541 · scan of s = \"{s}\": each '(' owes two ')', each ')' pays one")
+    ax.set_xticks(x)
+    ax.set_xticklabels(["start"] + [f"{i+1}\n{c}" for i, c in enumerate(s)], color=TEXT, fontsize=11)
+    ax.set_xlabel("prefix length · character consumed", color=MUTED)
+    ax.set_ylabel("need", color=MUTED)
+    ax.set_ylim(-1.8, max(need) + 1.4)
+    ax.set_xlim(-0.5, n + 0.7)
+    ax.set_yticks(range(-1, max(need) + 1))
+    ax.grid(alpha=0.10, color=MUTED)
+    ax.text(0.01, 0.97, f"answer = ins + need = {ins} + {need[-1]} = {ins + need[-1]}", transform=ax.transAxes,
+            ha="left", va="top", color=TEXT, fontsize=12,
+            bbox=dict(facecolor=PANEL, edgecolor=BORDER, boxstyle="round,pad=0.4"))
+    fig.tight_layout()
+    save(fig, "1541_need.png")
+
+
+def plot_1541_parity():
+    s = S1541_B
+    n = len(s)
+    need, events, ins = _trace_1541(s)
+    odd_at = {i for i, kind, _ in events if kind == "odd"}
+    fig, (ax, ax2) = plt.subplots(2, 1, figsize=(11, 6.6), gridspec_kw=dict(height_ratios=[3.2, 1]), sharex=True)
+    # top: need before each character, coloured by parity
+    before = need[:-1]
+    cols = [WARN if b % 2 else ACCENT for b in before]
+    bars = ax.bar(np.arange(n), before, width=0.62, color=cols, alpha=0.85, edgecolor=BG, zorder=2)
+    for i, b in enumerate(before):
+        ax.text(i, b + 0.12, str(b), color=TEXT, fontsize=10, ha="center", va="bottom")
+    for i in odd_at:
+        ax.scatter([i], [before[i] + 0.95], s=230, marker="v", color=CRIT, zorder=5, edgecolor=BG)
+        ax.text(i, before[i] + 1.35, f"'(' arrives on odd need\n→ insert ')' first ({before[i]}→{before[i]-1})",
+                color=CRIT, fontsize=9.3, ha="center", va="bottom")
+    ax.legend(handles=[mpatches.Patch(color=ACCENT, label="even need: every open '(' is whole"),
+                       mpatches.Patch(color=WARN, label="odd need: some '(' has only one ')' so far")],
+              loc="upper left", facecolor=PANEL, edgecolor=BORDER, labelcolor=TEXT, fontsize=9.5)
+    style_ax(ax, f"1541 · parity view of s = \"{s}\": need just before each character")
+    ax.set_ylabel("need before char", color=MUTED)
+    ax.set_ylim(0, max(before) + 3.0)
+    ax.grid(alpha=0.10, color=MUTED, axis="y")
+    # bottom: the characters, with the forced insertions spliced in
+    style_ax(ax2)
+    ax2.set_ylim(0, 1)
+    ax2.set_yticks([])
+    for i, c in enumerate(s):
+        is_ev = i in odd_at
+        ax2.text(i, 0.5, c, color=CRIT if (is_ev and False) else TEXT, fontsize=18, ha="center", va="center",
+                 family="monospace", bbox=dict(facecolor=PANEL, edgecolor=CRIT if is_ev else BORDER,
+                                               boxstyle="round,pad=0.3"))
+        if is_ev:
+            ax2.text(i - 0.48, 0.5, ")", color=CRIT, fontsize=18, ha="center", va="center", family="monospace",
+                     fontweight="bold")
+    ax2.text(n - 0.5 + 0.05, 0.5, "))", color=WARN, fontsize=18, ha="left", va="center", family="monospace",
+             fontweight="bold")
+    ax2.set_xticks(np.arange(n))
+    ax2.set_xticklabels([str(i + 1) for i in range(n)], color=MUTED)
+    ax2.set_xlim(-0.8, n + 0.3)
+    ax2.set_xlabel("position · red ')' = inserted on odd need, orange = appended leftover", color=MUTED)
+    ax.text(0.99, 0.97, f"answer = {len(odd_at)} (odd fixes) + {need[-1]} (leftover) = {ins + need[-1]}",
+            transform=ax.transAxes, ha="right", va="top", color=TEXT, fontsize=12,
+            bbox=dict(facecolor=PANEL, edgecolor=BORDER, boxstyle="round,pad=0.4"))
+    fig.tight_layout()
+    save(fig, "1541_parity.png")
+
+
 def main():
     plot_115()
     plot_940()
@@ -1590,6 +1707,8 @@ def main():
     plot_921_prefix()
     plot_301_balance()
     plot_301_dfs()
+    plot_1541_need()
+    plot_1541_parity()
     print("---")
     for p in sorted(OUT.glob("*.png")):
         print(f"{p.stat().st_size:8d}  {p.name}")

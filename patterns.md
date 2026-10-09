@@ -23,6 +23,7 @@ How to read an entry: **when** (the tell) → **move** (what you do) → **probl
 **Move:** scan with `open`; on `)` with `open == 0` do `adds += 1` (insert a `(`, counter stays 0); else decrement. Answer `adds + open`. Equivalent closed form on raw prefix balance P: `P_n − 2·min(0, min P)`.
 
 - **921** Minimum Add to Make Parentheses Valid: clamped counter, adds + open. O(n)/O(1).
+- **1541** Minimum Insertions to Balance a Parentheses String: each `(` owes two `)`; insert `)` when a `(` arrives on odd need, insert `(` on an orphan `)`; answer ins + need. O(n)/O(1).
 
 
 ## Depth counting: innermost () at depth d adds 2^d
