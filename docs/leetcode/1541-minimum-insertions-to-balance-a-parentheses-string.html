@@ -46,7 +46,7 @@
     <h2>The parity view: when odd need forces a ')'</h2>
     <p>Now <code>()(()))(</code>. Colour the counter by parity just before each character. Blue (even) means every open <code>(</code> is either untouched or fully closed. Orange (odd) means one <code>(</code> has received a single <code>)</code> and is waiting for its partner.</p>
     <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/1541_parity.png" alt="Parity bars for ()(()))(: need before each char; '(' at positions 3 and 8 arrives on odd need 1, forcing an inserted ')'; leftover 2; answer 4" /></div>
-    <p class="caption">Positions 3 and 8 are <code>(</code> arriving on odd need, so each forces a <code>)</code> (red). Position 6 is also odd, but there a <code>)</code> arrives and simply completes the pair. Answer \(2 + 2 = 4\): <code>())(()))())</code>.</p>
+    <p class="caption">Positions 3 and 8 are <code>(</code> arriving on odd need, so each forces a <code>)</code> (red). Position 6 is also odd, but there a <code>)</code> arrives and simply completes the pair. Answer \(2 + 2 = 4\): <code>())(())))())</code>.</p>
     <p>Formally, write \(\text{need}\) before a <code>(</code> at position \(i\). Then</p>
     $$\text{ins} \mathrel{+}= [\text{need}_i \bmod 2 = 1],\qquad \text{need}_{i+1} = \text{need}_i - (\text{need}_i \bmod 2) + 2$$
 
