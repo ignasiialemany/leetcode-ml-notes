@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>2333. Minimum Sum of Squared Difference · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+    <p><a class="ext" href="https://leetcode.com/problems/minimum-sum-of-squared-difference/">Open on LeetCode ↗</a></p>
+    <h1>2333. Minimum Sum of Squared Difference</h1>
+    <p class="lead"><span class="tag">Greedy water level: pool k1+k2, binary-search the cap on |d|</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>Only \(d_i = |a_i - b_i|\) matters, and a ±1 on <code>nums1</code> or on <code>nums2</code> both shrink some \(d_i\) by 1. So the two budgets merge into one, \(k = k_1 + k_2\). Lowering \(d\) by one saves \(d^2-(d-1)^2 = 2d-1\), which is largest for the largest \(d\). The greedy is always "hit the tallest bar", and doing that \(k\) times flattens the tops down to a common <em>water level</em> \(L\).</p>
+    $$L = \min\Big\{\,L \ge 0 : \sum_i \max(0,\, d_i - L) \le k\Big\}$$
+    <p>Find \(L\) by binary search (the cost is monotone in \(L\)). After capping everything at \(L\), the leftover \(r\) units are fewer than the number of bars sitting at \(L\), so \(r\) of them drop to \(L-1\). If \(\sum d_i \le k\) the answer is 0.</p></div>
+    <h2>Flattening the tallest bars</h2>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/2333_level.png" alt="sorted diffs 9,7,7,5,3,2,1 with k=8 capped at L=5" /></div>
+    <p class="caption">Diffs 9, 7, 7, 5, 3, 2, 1 with \(k=8\). Cutting the red tops costs 4+2+2 = 8 exactly, so \(L=5\) with nothing left over and \(\sum d^2\) falls from 218 to 114.</p>
+    <h2>Why greedy: convex, diminishing returns</h2>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/2333_budget.png" alt="minimum sum of squares vs budget, convex decreasing curve" /></div>
+    <p class="caption">Each extra unit saves \(2\max d - 1\), and that max only goes down, so the curve is convex. No exchange can beat always shaving the current maximum.</p>
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def minSumSquareDiff(self, nums1, nums2, k1, k2):
+        d = [abs(a - b) for a, b in zip(nums1, nums2)]
+        k = k1 + k2
+        if sum(d) &lt;= k:
+            return 0
+        lo, hi = 0, max(d)
+        while lo &lt; hi:                       # smallest affordable cap
+            mid = (lo + hi) // 2
+            if sum(x - mid for x in d if x &gt; mid) &lt;= k: hi = mid
+            else: lo = mid + 1
+        L = lo
+        k -= sum(x - L for x in d if x &gt; L)  # leftover &lt; #bars at L
+        cnt = sum(1 for x in d if x &gt;= L)
+        res = sum(x * x for x in d if x &lt; L)
+        return res + (cnt - k) * L * L + k * (L - 1) ** 2</code></pre>
+    <h2>Complexity</h2>
+    <p>\(O(n \log \max d)\) time, \(O(n)\) space for the diffs (a counting-sort sweep over values ≤ 1e5 also works in \(O(n + \max d)\)).</p>
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>

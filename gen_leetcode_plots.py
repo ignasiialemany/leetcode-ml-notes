@@ -1716,3 +1716,52 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def plot_2333():
+    """2333: water-level flattening of |d| with pooled budget k."""
+    import matplotlib.pyplot as plt
+    d = sorted([9, 7, 7, 5, 3, 2, 1], reverse=True)
+    k = 8
+    lo, hi = 0, max(d)
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if sum(x - mid for x in d if x > mid) <= k:
+            hi = mid
+        else:
+            lo = mid + 1
+    L = lo
+    left = k - sum(x - L for x in d if x > L)
+    after = []
+    for x in d:
+        if x >= L and left > 0:
+            after.append(L - 1); left -= 1
+        else:
+            after.append(min(x, L))
+    fig, ax = plt.subplots(figsize=(9, 4.5))
+    idx = range(len(d))
+    ax.bar(idx, d, color=CRIT, alpha=.85, label="removed by budget")
+    ax.bar(idx, after, color=ACCENT, label="final |d_i|")
+    ax.axhline(L, color=WARN, ls="--", lw=1.6, label=f"cap L={L}")
+    ax.legend(facecolor=PANEL, edgecolor=BORDER, labelcolor=TEXT)
+    ax.set_xlabel("index (sorted by |d|)", color=MUTED); ax.set_ylabel("|d_i|", color=MUTED)
+    style_ax(ax, f"2333 · flatten tallest diffs, k={k}: Σd²  {sum(x*x for x in d)} → {sum(x*x for x in after)}")
+    save(fig, "2333_level.png")
+
+    # objective vs budget
+    from heapq import heapify, heappop, heappush
+    vals = []
+    h = [-x for x in d]; heapify(h)
+    vals.append(sum(x * x for x in d))
+    for _ in range(sum(d)):
+        x = -heappop(h); heappush(h, -(x - 1)); vals.append(sum(y * y for y in h))
+    fig, ax = plt.subplots(figsize=(9, 4))
+    ax.plot(range(len(vals)), vals, color=ACCENT2, marker="o", ms=3)
+    ax.axvline(k, color=WARN, ls="--", lw=1.4)
+    ax.set_xlabel("budget k = k1 + k2", color=MUTED); ax.set_ylabel("min Σ d²", color=MUTED)
+    style_ax(ax, "each unit removes 2·max−1: convex, diminishing returns, 0 at k ≥ Σd")
+    save(fig, "2333_budget.png")
+
+
+if __name__ == "__main__" and "2333" in __import__("sys").argv:
+    plot_2333()

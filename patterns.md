@@ -245,3 +245,4 @@ One problem can sit on two patterns. Put it where the *bottleneck insight* was.
 
 - **20** Valid Parentheses: close must match stack top (LIFO); leftover opens → false.
 
+- **2333** Minimum Sum of Squared Difference: pool k=k1+k2 on |d|; binary-search water level L, leftover drops some L to L-1. O(n log max d).
