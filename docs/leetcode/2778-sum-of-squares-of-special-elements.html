@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>2778. Sum of Squares of Special Elements · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+<p><a class="ext" href="https://leetcode.com/problems/sum-of-squares-of-special-elements/">Open on LeetCode ↗</a></p>
+<h1>2778. Sum of Squares of Special Elements</h1>
+<p class="lead"><span class="tag">Divisor scan: indices i with n % i == 0</span></p>
+<h2>Insight</h2><div class="insight"><p>Special depends only on the <em>index</em>, never the value: \(i\) is special iff \(i \mid n\). So the answer is $$\sum_{i \mid n} \text{nums}_i^2$$ A linear scan is \(O(n)\); iterating divisor pairs up to \(\sqrt n\) gives \(O(\sqrt n)\). Watch the 1-indexing.</p></div>
+<h2>Which indices count</h2><div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/2778_divisors.png" alt="bars for nums, divisor indices highlighted"/></div>
+<p class="caption">n = 6 has divisors 1, 2, 3, 6; indices 4 and 5 are skipped regardless of how large their values are.</p>
+<h2>Code</h2><pre><code>class Solution:
+    def sumOfSquares(self, nums):
+        n = len(nums)
+        return sum(nums[i-1]**2 for i in range(1, n+1) if n % i == 0)
+</code></pre>
+</main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>
