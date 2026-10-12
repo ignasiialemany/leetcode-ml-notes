@@ -1765,3 +1765,59 @@ def plot_2333():
 
 if __name__ == "__main__" and "2333" in __import__("sys").argv:
     plot_2333()
+
+
+def plot_2897():
+    """2897: per-bit counts are invariant; greedy stacks bits into k numbers."""
+    nums, k = [2, 6, 5, 8], 2
+    B = 4
+    cnt = [sum(x >> b & 1 for x in nums) for b in range(B)]
+    c = cnt[:]
+    after = []
+    for _ in range(len(nums)):
+        v = 0
+        for b in range(B):
+            if c[b]:
+                c[b] -= 1; v |= 1 << b
+        after.append(v)
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4.2))
+    cmap = LinearSegmentedColormap.from_list("bits", [PANEL, ACCENT])
+    for ax, arr, ttl in [(axes[0], nums, "before"), (axes[1], after, "after greedy stacking")]:
+        M = np.array([[x >> b & 1 for b in reversed(range(B))] for x in arr])
+        ax.imshow(M, cmap=cmap, vmin=0, vmax=1, aspect="auto")
+        for i, x in enumerate(arr):
+            for j in range(B):
+                ax.text(j, i, str(M[i, j]), ha="center", va="center", color=TEXT, fontsize=12)
+            ax.text(B - 0.35, i, f"= {x}", ha="left", va="center", color=ACCENT2 if (ttl != "before" and i < k) else MUTED, fontsize=12)
+        ax.set_xticks(range(B)); ax.set_xticklabels([f"bit {b}" for b in reversed(range(B))])
+        ax.set_yticks(range(len(arr))); ax.set_yticklabels([f"#{i+1}" for i in range(len(arr))])
+        ax.set_xlim(-0.5, B + 0.6)
+        style_ax(ax, ttl)
+    fig.suptitle(f"2897 · column sums stay {list(reversed(cnt))}; top-{k} squares 8²+6²=100 → 15²+6²=261", color=TEXT, fontsize=12)
+    save(fig, "2897_bits.png")
+
+    # every reachable state of the example, enumerated by BFS
+    start = tuple(nums); seen = {start}; st = [start]
+    while st:
+        s = st.pop()
+        for i in range(len(s)):
+            for j in range(len(s)):
+                if i == j:
+                    continue
+                t = list(s); t[i], t[j] = s[i] & s[j], s[i] | s[j]; t = tuple(t)
+                if t not in seen:
+                    seen.add(t); st.append(t)
+    scores = sorted({sum(x * x for x in sorted(s, reverse=True)[:k]) for s in seen})
+    fig, ax = plt.subplots(figsize=(9, 4.2))
+    allsc = [sum(x * x for x in sorted(s, reverse=True)[:k]) for s in seen]
+    ax.hist(allsc, bins=30, color=ACCENT, alpha=.85)
+    ax.axvline(max(allsc), color=ACCENT2, lw=2, label=f"greedy = max = {max(allsc)}")
+    ax.axvline(100, color=WARN, ls="--", lw=1.6, label="start = 100")
+    ax.legend(facecolor=PANEL, edgecolor=BORDER, labelcolor=TEXT)
+    ax.set_xlabel(f"top-{k} sum of squares", color=MUTED); ax.set_ylabel("# reachable states", color=MUTED)
+    style_ax(ax, f"2897 · all {len(seen)} reachable states of [2,6,5,8]: greedy hits the max")
+    save(fig, "2897_reachable.png")
+
+
+if __name__ == "__main__" and "2897" in __import__("sys").argv:
+    plot_2897()

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>2897. Apply Operations on Array to Maximize Sum of Squares · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+    <p><a class="ext" href="https://leetcode.com/problems/apply-operations-on-array-to-maximize-sum-of-squares/">Open on LeetCode ↗</a></p>
+    <h1>2897. Apply Operations on Array to Maximize Sum of Squares</h1>
+    <p class="lead"><span class="tag">Bit counting: AND/OR preserves per-bit counts, stack bits greedily into k numbers</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>Look at one bit position. If both \(a\) and \(b\) have it, both keep it; if neither, neither; if exactly one has it, after the operation the OR side has it and the AND side doesn't. So the operation never creates or destroys a bit, it only <em>moves</em> it. The invariant is the column count \(c_b\) = how many numbers have bit \(b\), and every redistribution of those bits is reachable.</p>
+    <p>Squares are convex: moving a bit worth \(2^b\) from a smaller number to a larger one changes the sum by</p>
+    $$ (a+2^b)^2 + (s-2^b)^2 - a^2 - s^2 = 2\cdot 2^b\,(a - s) + 2\cdot 4^b > 0 \quad (a \ge s),$$
+    <p>so you always want the bits piled as high as possible. Greedy: build the first number from one copy of every bit with \(c_b &gt; 0\), decrement, repeat \(k\) times. Reduce mod \(10^9+7\) only after squaring each built value.</p></div>
+    <h2>Columns are invariant, rows get restacked</h2>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/2897_bits.png" alt="bit matrix of 2,6,5,8 before and after greedy stacking into 15,6,0,0" /></div>
+    <p class="caption">Example 1, nums = [2, 6, 5, 8] with \(k=2\). Each column keeps its count of ones; pushing them all to the top rows gives 15 and 6, so the answer is \(225 + 36 = 261\).</p>
+    <h2>Checked against every reachable state</h2>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/2897_reachable.png" alt="histogram of top-2 sum of squares over all 200 reachable states" /></div>
+    <p class="caption">A BFS over all 200 arrays reachable from [2, 6, 5, 8] (top-2 squares on the x axis). The greedy stacking lands exactly on the maximum, 261.</p>
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def maxSum(self, nums, k):
+        MOD = 10**9 + 7
+        cnt = [0] * 31
+        for x in nums:
+            for b in range(31):
+                if x &gt;&gt; b &amp; 1:
+                    cnt[b] += 1
+        ans = 0
+        for _ in range(k):          # build the biggest number from the remaining bits
+            v = 0
+            for b in range(31):
+                if cnt[b]:
+                    cnt[b] -= 1
+                    v |= 1 &lt;&lt; b
+            ans = (ans + v * v) % MOD
+        return ans</code></pre>
+    <h2>Complexity</h2>
+    <p>\(O(31\,(n + k))\) time and \(O(31)\) extra space.</p>
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>
