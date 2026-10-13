@@ -1821,3 +1821,49 @@ def plot_2897():
 
 if __name__ == "__main__" and "2897" in __import__("sys").argv:
     plot_2897()
+
+
+def plot_3727():
+    """3727: sort squares; larger half on + (even) slots, smaller half on − (odd) slots."""
+    import itertools
+    exs = [[1, 2, 3], [1, -1, 2, -2, 3, -3]]
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.4), gridspec_kw={"width_ratios": [3, 6]})
+    for ax, nums in zip(axes, exs):
+        sq = sorted(x * x for x in nums)
+        n = len(sq); m = n // 2
+        cols = [CRIT] * m + [ACCENT2] * (n - m)
+        ax.bar(range(n), sq, color=cols, edgecolor=BORDER)
+        for i, v in enumerate(sq):
+            sign = "−" if i < m else "+"
+            ax.text(i, v + 0.2, f"{sign}{v}", ha="center", va="bottom", color=TEXT, fontsize=11)
+        if m:
+            ax.axvline(m - 0.5, color=WARN, ls="--", lw=1.4)
+        ans = sum(sq[m:]) - sum(sq[:m])
+        ax.set_xticks(range(n)); ax.set_xticklabels([f"#{i}" for i in range(n)])
+        ax.set_xlabel("squares sorted ascending", color=MUTED); ax.set_ylabel("x²", color=MUTED)
+        ax.set_ylim(0, max(sq) * 1.25)
+        style_ax(ax, f"{nums} → {sum(sq[m:])} − {sum(sq[:m])} = {ans}")
+    handles = [mpatches.Patch(color=ACCENT2, label="+ slots (even idx, ⌈n/2⌉ of them)"),
+               mpatches.Patch(color=CRIT, label="− slots (odd idx, ⌊n/2⌋ of them)")]
+    fig.legend(handles=handles, loc="lower center", ncol=2, facecolor=PANEL, edgecolor=BORDER, labelcolor=TEXT,
+               bbox_to_anchor=(0.5, -0.11))
+    fig.suptitle("3727 · split the sorted squares: the big half is added, the small half subtracted", color=TEXT, fontsize=12, y=1.04)
+    save(fig, "3727_assign.png")
+
+    nums = exs[1]
+    scores = [sum((x * x) * (1 if i % 2 == 0 else -1) for i, x in enumerate(p)) for p in itertools.permutations(nums)]
+    sq = sorted(x * x for x in nums); m = len(sq) // 2
+    greedy = sum(sq[m:]) - sum(sq[:m])
+    fig, ax = plt.subplots(figsize=(9, 4.2))
+    vals, counts = np.unique(scores, return_counts=True)
+    ax.bar(vals, counts, width=1.6, color=ACCENT, alpha=.85)
+    ax.axvline(greedy, color=ACCENT2, lw=2, label=f"sort-and-split = max = {greedy}")
+    ax.axvline(scores[0], color=WARN, ls="--", lw=1.6, label=f"given order = {scores[0]}")
+    ax.legend(facecolor=PANEL, edgecolor=BORDER, labelcolor=TEXT)
+    ax.set_xlabel("alternating score", color=MUTED); ax.set_ylabel("# permutations", color=MUTED)
+    style_ax(ax, f"3727 · all {len(scores)} orderings of {nums}: greedy hits the max")
+    save(fig, "3727_perms.png")
+
+
+if __name__ == "__main__" and "3727" in __import__("sys").argv:
+    plot_3727()

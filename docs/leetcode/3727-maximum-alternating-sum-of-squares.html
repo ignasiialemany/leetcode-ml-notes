@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>3727. Maximum Alternating Sum of Squares · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+    <p><a class="ext" href="https://leetcode.com/problems/maximum-alternating-sum-of-squares/">Open on LeetCode ↗</a></p>
+    <h1>3727. Maximum Alternating Sum of Squares</h1>
+    <p class="lead"><span class="tag">Sort and assign by magnitude: larger half of the squares on + slots, smaller half on − slots</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>The score is</p>
+    $$ \text{score} = \sum_{i} (-1)^i\, a_i^2 , $$
+    <p>so each element only shows up as \(a_i^2\), and the sign comes from the slot it lands in, not from its neighbours. Signs in the input disappear once squared, so \(-3\) and \(3\) are the same thing here. With \(n\) elements there are \(\lceil n/2 \rceil\) plus slots (even indices) and \(\lfloor n/2 \rfloor\) minus slots (odd indices).</p>
+    <p>Once you know which squares go to \(+\) and which go to \(-\), the order inside each group doesn't matter. Swap argument: if some square \(p\) on a \(+\) slot is smaller than some square \(q\) on a \(-\) slot, swapping them changes the score by \((q - p) - (p - q) = 2(q-p) &gt; 0\). So at the optimum every \(+\) square is \(\ge\) every \(-\) square. Sort the squares, put the bottom \(\lfloor n/2 \rfloor\) on minus and the rest on plus:</p>
+    $$ \text{ans} = \sum_{j \ge \lfloor n/2 \rfloor} s_j \; - \sum_{j &lt; \lfloor n/2 \rfloor} s_j, \qquad s = \operatorname{sort}(a_i^2). $$
+    <p>Values reach \(n \cdot (4\cdot10^4)^2 = 1.6\cdot10^{14}\), so in C++/Java you need 64-bit ints. Python's ints are fine.</p></div>
+    <h2>Split the sorted squares</h2>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/3727_assign.png" alt="sorted squares of both examples, colored red for minus slots and green for plus slots" /></div>
+    <p class="caption">Both examples. Left: [1, 2, 3] has two plus slots and one minus slot, so the smallest square 1 is subtracted: \(13 - 1 = 12\). Right: [1, −1, 2, −2, 3, −3] squares to [1, 1, 4, 4, 9, 9]. The bottom three are subtracted and the top three added: \(22 - 6 = 16\). The two 4s fall on opposite sides of the split.</p>
+    <h2>Checked against every ordering</h2>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/3727_perms.png" alt="histogram of alternating scores over all 720 permutations of example 2" /></div>
+    <p class="caption">Scores of all 720 orderings of [1, −1, 2, −2, 3, −3]. The sort-and-split value of 16 is exactly the right edge of the distribution. The given order scores 0.</p>
+    <h2>Code</h2>
+    <pre><code>from typing import List
+
+class Solution:
+    def maxAlternatingSum(self, nums: List[int]) -&gt; int:
+        squares = sorted(x * x for x in nums)
+        m = len(squares) // 2          # number of − slots (odd indices)
+        return sum(squares[m:]) - sum(squares[:m])</code></pre>
+    <h2>Complexity</h2>
+    <p>\(O(n \log n)\) time for the sort and \(O(n)\) extra space for the squares. Counting sort over \(|x| \le 4\cdot10^4\) would make it \(O(n + V)\), but you don't need it.</p>
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>
