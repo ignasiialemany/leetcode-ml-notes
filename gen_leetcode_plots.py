@@ -1867,3 +1867,49 @@ def plot_3727():
 
 if __name__ == "__main__" and "3727" in __import__("sys").argv:
     plot_3727()
+
+
+def plot_3723():
+    """3723: pack 9s first (x² convex), then the remainder, then zeros."""
+    num, s = 4, 22
+    greedy = [9, 9, 4, 0]
+    alts = [("pack 9s (greedy)", greedy), ("spread evenly", [6, 6, 5, 5]), ("in between", [8, 7, 7, 0])]
+    fig, axes = plt.subplots(1, 3, figsize=(12, 4.2), sharey=True)
+    for ax, (name, d) in zip(axes, alts):
+        sc = sum(x * x for x in d)
+        col = ACCENT2 if d == greedy else ACCENT
+        ax.bar(range(num), d, color=col, edgecolor=BORDER)
+        for i, x in enumerate(d):
+            ax.text(i, x + 0.2, f"{x}²={x*x}", ha="center", va="bottom", color=TEXT, fontsize=10)
+        ax.set_xticks(range(num)); ax.set_xticklabels([f"pos {i}" for i in range(num)])
+        ax.set_ylim(0, 11); ax.set_xlabel("digit position", color=MUTED)
+        style_ax(ax, f"{name}: {''.join(map(str, d))} → {sc}")
+    axes[0].set_ylabel("digit", color=MUTED)
+    fig.suptitle(f"3723 · same digit sum {s}, num={num}: concentrating the mass wins because x² is convex",
+                 color=TEXT, fontsize=12, y=1.03)
+    save(fig, "3723_pack.png")
+
+    num, s = 3, 13
+    pts = []
+    for n in range(10 ** (num - 1), 10 ** num):
+        d = [int(c) for c in str(n)]
+        if sum(d) == s:
+            pts.append((n, sum(x * x for x in d)))
+    ns, scs = zip(*pts)
+    best = max(pts, key=lambda p: (p[1], p[0]))
+    fig, ax = plt.subplots(figsize=(9.5, 4.4))
+    ax.scatter(ns, scs, s=22, color=ACCENT, alpha=.85, label=f"all {len(pts)} good integers")
+    ax.scatter([best[0]], [best[1]], s=140, color=ACCENT2, edgecolor=TEXT, zorder=3,
+               label=f"greedy '940' = max score {best[1]}, largest among ties")
+    ties = [p for p in pts if p[1] == best[1] and p != best]
+    if ties:
+        ax.scatter([p[0] for p in ties], [p[1] for p in ties], s=70, color=WARN, zorder=3,
+                   label="same score, smaller number: " + ", ".join(str(p[0]) for p in ties))
+    ax.legend(facecolor=PANEL, edgecolor=BORDER, labelcolor=TEXT, loc="upper center", bbox_to_anchor=(0.5, -0.16), ncol=1)
+    ax.set_xlabel("n", color=MUTED); ax.set_ylabel("sum of squared digits", color=MUTED)
+    style_ax(ax, f"3723 · num={num}, sum={s}: every candidate, greedy sits at the top-right")
+    save(fig, "3723_all.png")
+
+
+if __name__ == "__main__" and "3723" in __import__("sys").argv:
+    plot_3723()

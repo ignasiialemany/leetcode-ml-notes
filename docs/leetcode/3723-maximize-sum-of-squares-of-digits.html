@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>3723. Maximize Sum of Squares of Digits · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+    <p><a class="ext" href="https://leetcode.com/problems/maximize-sum-of-squares-of-digits/">Open on LeetCode ↗</a></p>
+    <h1>3723. Maximize Sum of Squares of Digits</h1>
+    <p class="lead"><span class="tag">Greedy by convexity: pack 9s, then the remainder, then zeros</span></p>
+    <h2>Insight</h2>
+    <div class="insight"><p>We pick \(num\) digits \(d_i \in [0, 9]\) with \(\sum_i d_i = sum\) and want to maximise</p>
+    $$ \text{score} = \sum_i d_i^2 . $$
+    <p>The square is convex, so spreading the total out is the worst thing you can do and concentrating it is the best. Exchange argument: take two digits \(a \ge b \ge 1\) with \(a &lt; 9\). Moving one unit from \(b\) to \(a\) keeps the sum and changes the score by</p>
+    $$ (a+1)^2 + (b-1)^2 - a^2 - b^2 = 2(a - b) + 2 &gt; 0 . $$
+    <p>So at the optimum at most one digit sits strictly between 0 and 9. That fixes the multiset: \(\lfloor sum/9 \rfloor\) nines, one digit \(sum \bmod 9\) if it's nonzero, and zeros for the rest.</p>
+    <p>The tie-break is free. Every max-score integer uses that same multiset, and writing it in descending order (9s, remainder, zeros) gives the largest number. The leading digit is never 0 because \(sum \ge 1\). The only infeasible case is \(sum &gt; 9 \cdot num\).</p></div>
+    <h2>Same sum, different spreads</h2>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/3723_pack.png" alt="three 4-digit numbers with digit sum 22: 9940 scores 178, 8770 scores 162, 6655 scores 122" /></div>
+    <p class="caption">Three ways to split a digit sum of 22 across 4 digits. Packing the 9s gives 9940 with score 178. The even spread 6655 only gets 122. Each step toward concentration raises the score, which is exactly the \(2(a-b)+2\) gain above.</p>
+    <h2>Checked against every candidate</h2>
+    <div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/3723_all.png" alt="scatter of all 69 three-digit numbers with digit sum 13, score versus value" /></div>
+    <p class="caption">All 69 three-digit numbers whose digits sum to 13. The top score of 97 is reached by 409, 490, 904 and 940, which are the four valid orderings of {9, 4, 0}. Greedy writes them descending and lands on 940, the top-right point.</p>
+    <h2>Code</h2>
+    <pre><code>class Solution:
+    def maxSumOfSquares(self, num: int, sum: int) -&gt; str:
+        if sum &gt; 9 * num:
+            return ""
+        nines, rem = divmod(sum, 9)
+        digits = "9" * nines + (str(rem) if rem else "")
+        return digits + "0" * (num - len(digits))</code></pre>
+    <h2>Complexity</h2>
+    <p>\(O(num)\) time and space to build the string, which is the size of the output anyway.</p>
+    <p><a href="/leetcode-ml-notes/leetcode/">← all LeetCode</a></p>
+  </main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>
