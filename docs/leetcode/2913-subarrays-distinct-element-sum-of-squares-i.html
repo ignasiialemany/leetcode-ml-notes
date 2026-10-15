@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>2913. Subarrays Distinct Element Sum of Squares I · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+<p><a class="ext" href="https://leetcode.com/problems/subarrays-distinct-element-sum-of-squares-i/">Open on LeetCode ↗</a></p>
+<h1>2913. Subarrays Distinct Element Sum of Squares I</h1>
+<p class="lead"><span class="tag">Expand right, maintain distinct count</span></p>
+<h2>Insight</h2>
+<div class="insight"><p>\(n \le 100\), so every subarray is fair game. Fix the left endpoint \(i\), grow the right endpoint \(j\), and keep a set of values seen in \([i,j]\). Each step costs \(O(1)\) amortized and contributes \(\lvert S\rvert^2\):</p>
+<p>$$\sum_{0\le i\le j&lt;n} \bigl(\#\{\textit{nums}[i..j]\}\bigr)^2$$</p>
+<p>No need to rebuild the set from scratch for each \((i,j)\).</p></div>
+<h2>All subarrays for nums = [1, 2, 1]</h2>
+<div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/2913_subarray_grid.png" alt="heatmap of distinct-count squared for every subarray of [1,2,1]"/></div>
+<p class="caption">Upper triangle only: cell (i,j) is the contribution of nums[i..j]. Six cells sum to \(1+4+4+1+4+1 = 15\).</p>
+<h2>Expand right for fixed i = 0</h2>
+<div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/2913_expand_right.png" alt="three steps expanding right from i=0, set growing"/></div>
+<p class="caption">Start a fresh set for each left endpoint; as j walks right, insert and add \(\lvert S\rvert^2\).</p>
+<h2>Code</h2>
+<pre><code>class Solution:
+    def sumCounts(self, nums):
+        n = len(nums)
+        ans = 0
+        for i in range(n):
+            seen = set()
+            for j in range(i, n):
+                seen.add(nums[j])
+                ans += len(seen) * len(seen)
+        return ans
+</code></pre>
+</main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>

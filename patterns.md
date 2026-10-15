@@ -106,6 +106,16 @@ You do not build a graph. Sorting turns connected components into contiguous sli
 
 ---
 
+## Expand right, maintain distinct count (tiny n)
+
+**When:** sum f(distinct count) over all subarrays; n≤100–300 so O(n²) is fine.
+
+**Move:** for each left i, grow right j with a set (or freq map); add f(len(set)) each step. Don't rebuild the set from scratch.
+
+- **2913** Subarrays Distinct Element Sum of Squares I: f = square; set of values as j expands.
+
+
+
 ## Weighted intervals, pick ≤k
 
 **When:** pick up to a tiny `k` non-overlapping weighted intervals (`n` large), often with a lex-smallest index tie-break. Boundary-touch usually counts as overlap.
