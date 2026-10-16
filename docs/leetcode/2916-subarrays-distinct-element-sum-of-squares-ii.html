@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>2916. Subarrays Distinct Element Sum of Squares II · Ignasi notes</title>
+  <link rel="stylesheet" href="/leetcode-ml-notes/assets/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
+<style>
+  .plot { margin: 1rem 0 1.5rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .plot img { display: block; width: 100%; height: auto; }
+  .caption { color: var(--muted); font-size: .9rem; margin: -.75rem 0 1.25rem; }
+  .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/leetcode-ml-notes/">Ignasi · practice notes</a>
+    <nav><a href="/leetcode-ml-notes/" class="">Home</a>
+<a href="/leetcode-ml-notes/leetcode/" class="active">LeetCode</a>
+<a href="/leetcode-ml-notes/ml/" class="">ML</a>
+<a href="/leetcode-ml-notes/patterns/" class="">Patterns</a></nav>
+  </header>
+  <main>
+<p><a class="ext" href="https://leetcode.com/problems/subarrays-distinct-element-sum-of-squares-ii/">Open on LeetCode ↗</a></p>
+<h1>2916. Subarrays Distinct Element Sum of Squares II</h1>
+<p class="lead"><span class="tag">Sweep right end + range add / range sum (two Fenwick trees)</span></p>
+<h2>Insight</h2>
+<div class="insight"><p>Same question as <a href="/leetcode-ml-notes/leetcode/2913-subarrays-distinct-element-sum-of-squares-i.html">2913</a>, but \(n \le 10^5\), so the \(O(n^2)\) expand-right loop is dead. Sweep the right end \(j\) and keep \(f[i]\) = distinct count of \(\textit{nums}[i..j]\) for every left end \(i\le j\).</p>
+<p>When \(x=\textit{nums}[j]\) arrives, it is new exactly for the left ends after its previous occurrence \(p\): \(f[i] \mathrel{+}= 1\) for \(i\in(p,j]\). We need \(\sum_i f[i]^2\), and a square is not range-additive, but its change is:</p>
+<p>$$\sum_{i=p+1}^{j} (f_i+1)^2 - f_i^2 \;=\; 2\sum_{i=p+1}^{j} f_i \;+\; (j-p)$$</p>
+<p>So keep one running scalar \(Q=\sum_{i\le j} f_i^2\), update it with a <em>range sum</em> of \(f\), then apply the <em>range add</em>. Answer \(=\sum_j Q_j\). Range add + range sum is two Fenwick trees (or a lazy segment tree): \(O(n\log n)\).</p></div>
+<h2>Each row is one right end j</h2>
+<div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/2916_sweep_grid.png" alt="triangle of f[i] for each right end j with the bumped range boxed"/></div>
+<p class="caption">Row \(j\) holds \(f[i]\) for subarrays ending at \(j\). The green box is the only part that changes when \(\textit{nums}[j]\) arrives: everything after the last copy of the same value. The orange number is \(Q_j\); the answer is \(1+5+9+23+32=70\).</p>
+<h2>Why the range sum is all you need</h2>
+<div class="plot"><img src="/leetcode-ml-notes/leetcode/assets/2916_update.png" alt="stacked bars: previous sum of squares, plus twice the range sum, plus the range length"/></div>
+<p class="caption">Each bar is \(Q_j\) split into the old \(Q\), the \(2\sum f\) term from the range sum, and the \(+\text{len}\) term. \((f+1)^2=f^2+2f+1\) turns a non-additive square into a range-sum query.</p>
+<h2>Code</h2>
+<pre><code>class Solution:
+    def sumCounts(self, nums: List[int]) -&gt; int:
+        # Sweep the right end j. f[i] = distinct count of nums[i..j].
+        # When nums[j] arrives, f[i] += 1 exactly for i in (last[nums[j]], j].
+        # sum f^2 over that range grows by 2*sum(f) + len, so we only need
+        # range-add / range-sum: two Fenwick trees.
+        MOD = 10**9 + 7
+        n = len(nums)
+        b1 = [0] * (n + 1)
+        b2 = [0] * (n + 1)
+
+        def upd(i: int, v: int) -&gt; None:  # point update at 1-based i of diff array
+            w = v * i
+            while i &lt;= n:
+                b1[i] += v
+                b2[i] += w
+                i += i &amp; -i
+
+        def pref(i: int) -&gt; int:  # sum f[1..i]
+            s1 = s2 = 0
+            k = i
+            while k &gt; 0:
+                s1 += b1[k]
+                s2 += b2[k]
+                k -= k &amp; -k
+            return (i + 1) * s1 - s2
+
+        last = {}
+        sq = 0  # sum over i&lt;=j of f[i]^2
+        ans = 0
+        for j, x in enumerate(nums, 1):
+            l = last.get(x, 0) + 1  # 1-based range [l, j]
+            s = pref(j) - pref(l - 1)
+            sq += 2 * s + (j - l + 1)
+            upd(l, 1)
+            if j + 1 &lt;= n:
+                upd(j + 1, -1)
+            last[x] = j
+            ans += sq
+        return ans % MOD
+</code></pre>
+</main>
+  <footer>
+    <p>Sourced from coaching sessions. Code also lives in the Origin notebook.</p>
+  </footer>
+</body>
+</html>

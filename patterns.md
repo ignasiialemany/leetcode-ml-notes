@@ -116,6 +116,16 @@ You do not build a graph. Sorting turns connected components into contiguous sli
 
 
 
+## Sweep right end + range add / range sum (all subarrays, large n)
+
+**When:** sum f(distinct count) (or another per-subarray stat) over all subarrays with n up to 1e5; the tiny-n version is "Expand right" above.
+
+**Move:** sweep j; nums[j] bumps f[i] by +1 only for i in (last[nums[j]], j]. Track Σf² with (f+1)² = f² + 2f + 1, so each step is one range sum then one range add (two Fenwick trees or a lazy segment tree). Add the running Σf² to the answer every step.
+
+- **2916** Subarrays Distinct Element Sum of Squares II: sweep j; +1 on (last[x], j]; Σf² grows by 2·Σf + len over that range; two BITs for range add + range sum.
+
+
+
 ## Weighted intervals, pick ≤k
 
 **When:** pick up to a tiny `k` non-overlapping weighted intervals (`n` large), often with a lex-smallest index tie-break. Boundary-touch usually counts as overlap.

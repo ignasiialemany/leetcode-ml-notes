@@ -1913,3 +1913,65 @@ def plot_3723():
 
 if __name__ == "__main__" and "3723" in __import__("sys").argv:
     plot_3723()
+
+
+# ── 2916 sweep right end + range add / range sum ────────────────────────────
+def plot_2916():
+    nums = [1, 2, 1, 3, 2]
+    n = len(nums)
+    F = np.full((n, n), np.nan)  # F[j, i] = distinct count of nums[i..j]
+    bumped = []
+    last = {}
+    f = [0] * n
+    rows = []
+    for j, x in enumerate(nums):
+        l = last.get(x, -1) + 1
+        s = sum(f[l:j + 1])
+        before = sum(v * v for v in f[:j + 1])
+        for i in range(l, j + 1):
+            f[i] += 1
+        after = sum(v * v for v in f[:j + 1])
+        rows.append((j, x, l, before, 2 * s, j - l + 1, after))
+        bumped.append((l, j))
+        last[x] = j
+        for i in range(j + 1):
+            F[j, i] = f[i]
+
+    cmap = LinearSegmentedColormap.from_list("d", [PANEL, ACCENT])
+    fig, ax = plt.subplots(figsize=(7.6, 5.6))
+    ax.imshow(F, cmap=cmap, vmin=0, vmax=np.nanmax(F))
+    for j in range(n):
+        l, r = bumped[j]
+        ax.add_patch(mpatches.Rectangle((l - .5, j - .5), r - l + 1, 1, fill=False,
+                                        edgecolor=ACCENT2, lw=2.4))
+        for i in range(j + 1):
+            ax.text(i, j, int(F[j, i]), ha="center", va="center", color=TEXT, fontsize=12)
+        ax.text(n - .3, j, f"Σf²={rows[j][6]}", ha="left", va="center", color=WARN, fontsize=10)
+    ax.set_xticks(range(n)); ax.set_xticklabels([f"i={i}\n({v})" for i, v in enumerate(nums)])
+    ax.set_yticks(range(n)); ax.set_yticklabels([f"j={j}  +{v}" for j, v in enumerate(nums)])
+    ax.set_xlabel("left end i", color=MUTED); ax.set_ylabel("right end j (value arriving)", color=MUTED)
+    ax.set_xlim(-.5, n + 1.2)
+    style_ax(ax, f"2916 · nums={nums}: row j = f[i] for subarrays [i..j]\ngreen box = range (last[x], j] that gets +1")
+    save(fig, "2916_sweep_grid.png")
+
+    fig, ax = plt.subplots(figsize=(9.5, 4.4))
+    js = np.arange(n)
+    before = np.array([r[3] for r in rows]); two_s = np.array([r[4] for r in rows]); ln = np.array([r[5] for r in rows])
+    ax.bar(js, before, color=PANEL, edgecolor=BORDER, label="Σf² before nums[j] (old subarrays i<j, and new i=j at 0)")
+    ax.bar(js, two_s, bottom=before, color=ACCENT, edgecolor=BORDER, label="2·Σf over bumped range  (range sum)")
+    ax.bar(js, ln, bottom=before + two_s, color=ACCENT2, edgecolor=BORDER, label="+ length of bumped range")
+    total = 0
+    for r in rows:
+        total += r[6]
+        ax.text(r[0], r[6] + .3, f"{r[6]}", ha="center", va="bottom", color=TEXT, fontsize=11)
+    ax.set_xticks(js); ax.set_xticklabels([f"j={j} (x={v})" for j, v in enumerate(nums)])
+    ax.set_ylabel("Σ over i≤j of f[i]²", color=MUTED)
+    ax.legend(facecolor=PANEL, edgecolor=BORDER, labelcolor=TEXT, fontsize=9, loc="upper left")
+    ax.set_ylim(0, max(r[6] for r in rows) * 1.6)
+    style_ax(ax, f"2916 · (f+1)² = f² + 2f + 1, summed over the range → answer = Σ bars = {total}")
+    save(fig, "2916_update.png")
+    return total
+
+
+if __name__ == "__main__" and "2916" in __import__("sys").argv:
+    print("answer", plot_2916())
